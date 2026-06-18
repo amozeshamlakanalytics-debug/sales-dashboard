@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد فروش تیم</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+    min-height: 100vh;
+    padding: 1.5rem;
+    direction: rtl;
+  }
+  .timer-bar { height: 4px; background: #2a2a2a; border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+  .timer-fill { height: 100%; background: #BF9757; width: 0%; transition: width linear; }
+  .slide { display: none; animation: fadeIn .5s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 8px; }
+  .slide-name { font-size: 22px; font-weight: 700; }
+  .slide-sub { font-size: 12px; color: #888; margin-top: 3px; }
+  .badge { font-size: 11px; padding: 4px 14px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+  .badge-gold { background: #BF9757; color: #fff; }
+  .badge-total { background: #2a1f0d; border: 1px solid #BF9757; color: #BF9757; }
+  .sum-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 1.2rem; }
+  .sc { background: #1a1a1a; border-radius: 8px; padding: .6rem .8rem; text-align: center; border: .5px solid #2a2a2a; }
+  .sn { font-size: 20px; font-weight: 700; color: #BF9757; }
+  .sl { font-size: 11px; color: #666; margin-top: 2px; }
+  .dv { height: .5px; background: #2a2a2a; margin: 0 0 1rem; }
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .ri { display: flex; align-items: center; gap: 10px; }
+  .rl { width: 150px; min-width: 100px; font-size: 13px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
+  .bo { flex: 1; height: 26px; background: #1a1a1a; border-radius: 30px; position: relative; overflow: hidden; border: .5px solid #2a2a2a; }
+  .bi { height: 100%; border-radius: 30px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; background: #BF9757; }
+  .bv { font-size: 12px; font-weight: 700; color: #fff; }
+  .bm { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #555; font-weight: 500; }
+  .pp { min-width: 38px; text-align: left; font-size: 12px; color: #666; font-weight: 500; flex-shrink: 0; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.2rem; flex-wrap: wrap; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: .5px solid #333; transition: background .3s; }
+  .dot.active { background: #BF9757; }
+  .nav-btns { display: flex; gap: 8px; justify-content: center; margin-top: .5rem; }
+  .nbtn { background: #1a1a1a; color: #BF9757; border: .5px solid #BF9757; border-radius: 20px; padding: 5px 16px; font-size: 12px; font-family: 'Vazirmatn', sans-serif; cursor: pointer; }
+  .nbtn:hover { background: #2a1f0d; }
+  .loading { text-align: center; padding: 3rem; color: #666; font-size: 16px; }
+  .error { text-align: center; padding: 2rem; color: #e24b4a; font-size: 14px; }
+  .refresh-info { text-align: center; font-size: 11px; color: #444; margin-top: .5rem; }
+</style>
+</head>
+<body>
+
+<div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+<div id="slidesWrap"><div class="loading">در حال دریافت اطلاعات از Google Sheets...</div></div>
+<div class="nav" id="navDots"></div>
+<div class="nav-btns">
+  <button class="nbtn" id="btnPrev">→ قبلی</button>
+  <button class="nbtn" id="btnPlay">⏸ توقف</button>
+  <button class="nbtn" id="btnNext">بعدی ←</button>
+</div>
+<div class="refresh-info" id="refreshInfo"></div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREbVqCizGPAJxn42P6HMEOWXwC8M7YZulA33gH9MplFbhbHxWn6UIxzxIn765HwvPhLBVJ-L6GO2Gb/pub?output=csv";
+const INTERVAL = 7000;
+const AUTO_REFRESH_MS = 5 * 60 * 1000; // هر ۵ دقیقه از شیت میخونه
+
+let cur = 0, playing = true, timer = null, people = [];
+const fill = document.getElementById('timerFill');
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g, '')));
+  const headers = lines[0];
+  return lines.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = row[i] || '');
+    return obj;
+  });
+}
+
+function groupByPerson(rows) {
+  const map = {};
+  const order = [];
+  rows.forEach(row => {
+    const name = row['name'];
+    if (!name) return;
+    if (!map[name]) {
+      map[name] = { name, badge: row['badge'] || 'کارشناس فروش', items: [] };
+      order.push(name);
+    }
+    map[name].items.push({
+      t: row['product'],
+      v: parseFloat(row['value']) || 0,
+      m: parseFloat(row['max']) || 1
+    });
+  });
+  const result = order.map(n => map[n]);
+
+  // ساخت اسلاید آمار کلی
+  const allProducts = {};
+  result.forEach(p => p.items.forEach(item => {
+    if (!allProducts[item.t]) allProducts[item.t] = { t: item.t, v: 0, m: 0 };
+    allProducts[item.t].v += item.v;
+    allProducts[item.t].m += item.m;
+  }));
+  result.push({ name: 'آمار کلی تیم', badge: 'مجموع ' + result.length + ' نفر', isTotal: true, items: Object.values(allProducts) });
+  return result;
+}
+
+function buildSlide(p, idx) {
+  const sold = p.items.reduce((a, b) => a + b.v, 0);
+  const maxT = p.items.reduce((a, b) => a + b.m, 0);
+  const pct = maxT ? Math.round(sold / maxT * 100) : 0;
+  const badgeClass = p.isTotal ? 'badge badge-total' : 'badge badge-gold';
+  const rows = p.items.map(item => {
+    const ip = item.m ? Math.min(Math.round(item.v / item.m * 100), 100) : 0;
+    return `<div class="ri">
+      <div class="rl">${item.t}</div>
+      <div class="bo">
+        <div class="bi" style="width:${ip}%;">
+          ${item.v > 0 ? `<span class="bv">${item.v}</span>` : ''}
+        </div>
+        <div class="bm">${item.m}</div>
+      </div>
+      <div class="pp">${ip}%</div>
+    </div>`;
+  }).join('');
+  return `<div class="slide${idx === 0 ? ' active' : ''}" id="slide${idx}">
+    <div class="slide-header">
+      <div>
+        <div class="slide-name">${p.name}</div>
+        <div class="slide-sub">${p.badge}</div>
+      </div>
+      <div class="${badgeClass}">${p.isTotal ? 'گزارش مدیریتی' : 'گزارش فروش'}</div>
+    </div>
+    <div class="sum-grid">
+      <div class="sc"><div class="sn">${sold}</div><div class="sl">فروش کل</div></div>
+      <div class="sc"><div class="sn">${maxT}</div><div class="sl">هدف کل</div></div>
+      <div class="sc"><div class="sn">${maxT - sold}</div><div class="sl">باقیمانده</div></div>
+      <div class="sc"><div class="sn">${pct}%</div><div class="sl">پیشرفت</div></div>
+    </div>
+    <div class="dv"></div>
+    <div class="rows">${rows}</div>
+  </div>`;
+}
+
+function renderSlides() {
+  const wrap = document.getElementById('slidesWrap');
+  const dots = document.getElementById('navDots');
+  wrap.innerHTML = people.map((p, i) => buildSlide(p, i)).join('');
+  dots.innerHTML = people.map((_, i) => `<div class="dot${i === 0 ? ' active' : ''}" data-i="${i}"></div>`).join('');
+  document.querySelectorAll('.dot').forEach(d => {
+    d.onclick = () => { stopPlay(); goTo(+d.dataset.i); if (playing) startPlay(); };
+  });
+}
+
+function goTo(n) {
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  if (slides[cur]) slides[cur].classList.remove('active');
+  if (dots[cur]) dots[cur].classList.remove('active');
+  cur = (n + people.length) % people.length;
+  if (slides[cur]) slides[cur].classList.add('active');
+  if (dots[cur]) dots[cur].classList.add('active');
+  resetFill();
+}
+function next() { goTo(cur + 1); }
+function prev() { goTo(cur - 1); }
+function resetFill() {
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  setTimeout(() => { fill.style.transition = `width ${INTERVAL}ms linear`; fill.style.width = '100%'; }, 30);
+}
+function startPlay() { clearInterval(timer); timer = setInterval(next, INTERVAL); resetFill(); }
+function stopPlay() { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0%'; }
+
+document.getElementById('btnNext').onclick = () => { stopPlay(); next(); if (playing) startPlay(); };
+document.getElementById('btnPrev').onclick = () => { stopPlay(); prev(); if (playing) startPlay(); };
+document.getElementById('btnPlay').onclick = function() {
+  playing = !playing;
+  if (playing) { startPlay(); this.textContent = '⏸ توقف'; }
+  else { stopPlay(); this.textContent = '▶ پخش'; }
+};
+
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error('خطا در دریافت');
+    const text = await res.text();
+    const rows = parseCSV(text);
+    people = groupByPerson(rows);
+    cur = 0;
+    renderSlides();
+    if (playing) startPlay();
+    const now = new Date().toLocaleTimeString('fa-IR');
+    document.getElementById('refreshInfo').textContent = 'آخرین بروزرسانی: ' + now;
+  } catch (e) {
+    document.getElementById('slidesWrap').innerHTML = `<div class="error">خطا در دریافت اطلاعات از Google Sheets<br><small>${e.message}</small></div>`;
+  }
+}
+
+loadData();
+setInterval(loadData, AUTO_REFRESH_MS);
+</script>
+</body>
+</html>
