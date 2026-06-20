@@ -10,106 +10,192 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     font-family: 'Vazirmatn', sans-serif;
-    background: #0a0a0a;
+    background: #07080a;
     color: #fff;
     direction: rtl;
     overflow-x: hidden;
   }
   body {
-    padding: 1.6rem 2.4rem 2rem;
+    padding: 1.8rem 2.6rem 2.2rem;
     min-height: 100vh;
     background:
-      radial-gradient(circle at 8% 8%, rgba(191,151,87,0.07), transparent 35%),
-      radial-gradient(circle at 92% 92%, rgba(191,151,87,0.05), transparent 35%),
-      #0a0a0a;
+      radial-gradient(circle at 10% 0%, rgba(191,151,87,0.10), transparent 40%),
+      radial-gradient(circle at 95% 100%, rgba(191,151,87,0.07), transparent 40%),
+      linear-gradient(180deg, #0a0b0d 0%, #07080a 100%);
+    position: relative;
   }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .stage { position: relative; z-index: 1; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes countGlow { 0%,100% { text-shadow: 0 0 18px rgba(191,151,87,0.0); } 50% { text-shadow: 0 0 18px rgba(191,151,87,0.35); } }
+  @keyframes ringSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes crownFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
   /* ===== TOP BAR ===== */
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem; flex-wrap: wrap; gap: 12px; }
-  .brand { display: flex; align-items: center; gap: 14px; }
-  .brand-mark { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #BF9757, #8a6d3e); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: #0a0a0a; flex-shrink: 0; }
-  .brand-text h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
-  .brand-text p { font-size: 13px; color: #888; margin-top: 2px; }
-  .live-pill { display: flex; align-items: center; gap: 8px; background: #161616; border: 1px solid #2a2a2a; border-radius: 30px; padding: 7px 18px; font-size: 13px; color: #aaa; }
-  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 8px #3ecf6e; animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-  .clock-text { font-size: 13px; color: #666; font-weight: 500; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.6rem; flex-wrap: wrap; gap: 12px; animation: fadeUp .5s ease; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand-mark { height: 50px; display: flex; align-items: center; flex-shrink: 0; }
+  .brand-mark img { height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(191,151,87,0.25)); }
+  .brand-text h1 { font-size: 25px; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(90deg, #fff 0%, #e8d5b0 50%, #fff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 6s linear infinite; }
+  .brand-text p { font-size: 13px; color: #888; margin-top: 3px; }
+  .top-right { display: flex; align-items: center; gap: 14px; }
+  .clock-box { text-align: left; }
+  .clock-time { font-size: 19px; font-weight: 700; color: #e8d5b0; font-variant-numeric: tabular-nums; }
+  .clock-date { font-size: 12px; color: #777; margin-top: 1px; }
+  .live-pill { display: flex; align-items: center; gap: 8px; background: #131418; border: 1px solid #262626; border-radius: 30px; padding: 8px 18px; font-size: 13px; color: #aaa; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 10px #3ecf6e; animation: pulse 1.6s ease-in-out infinite; }
 
   /* ===== KPI ROW ===== */
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.6rem; }
-  .kpi-card { background: #131313; border: 1px solid #232323; border-radius: 16px; padding: 1.1rem 1.3rem; position: relative; overflow: hidden; }
-  .kpi-card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: #BF9757; }
-  .kpi-label { font-size: 13px; color: #888; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-  .kpi-value { font-size: 30px; font-weight: 700; color: #fff; white-space: nowrap; }
-  .kpi-value .unit { font-size: 14px; color: #999; font-weight: 500; margin-right: 4px; }
-  .kpi-sub { font-size: 12px; color: #BF9757; margin-top: 4px; font-weight: 500; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 1.5rem; }
+  .kpi-card {
+    background: linear-gradient(160deg, #14151a 0%, #0f1012 100%);
+    border: 1px solid #232323;
+    border-radius: 18px;
+    padding: 1.25rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp .6s ease backwards;
+  }
+  .kpi-card:nth-child(1) { animation-delay: .05s; }
+  .kpi-card:nth-child(2) { animation-delay: .1s; }
+  .kpi-card:nth-child(3) { animation-delay: .15s; }
+  .kpi-card:nth-child(4) { animation-delay: .2s; }
+  .kpi-card::before { content: ''; position: absolute; top: -20%; right: -20%; width: 140px; height: 140px; background: radial-gradient(circle, rgba(191,151,87,0.18), transparent 70%); border-radius: 50%; }
+  .kpi-card::after { content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #BF9757, transparent); opacity: .6; }
+  .kpi-label { font-size: 13px; color: #8a8a8a; margin-bottom: 6px; font-weight: 500; }
+  .kpi-value { font-size: 31px; font-weight: 700; color: #fff; white-space: nowrap; position: relative; z-index: 1; animation: countGlow 3s ease-in-out infinite; }
+  .kpi-value .unit { font-size: 14px; color: #999; font-weight: 500; margin-right: 5px; }
+  .kpi-bar { height: 4px; background: #1d1e22; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, #8a6d3e, #BF9757); border-radius: 4px; transition: width 1s ease; }
+
+  /* ===== TEAM STRIP ===== */
+  .team-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 1.6rem; }
+  .team-card {
+    background: linear-gradient(160deg, #131418 0%, #0e0f11 100%);
+    border: 1px solid #222226;
+    border-radius: 18px;
+    padding: 1rem .8rem 1.1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp .6s ease backwards;
+    transition: border-color .3s, transform .3s;
+  }
+  .team-card:nth-child(1) { animation-delay: .05s; }
+  .team-card:nth-child(2) { animation-delay: .1s; }
+  .team-card:nth-child(3) { animation-delay: .15s; }
+  .team-card:nth-child(4) { animation-delay: .2s; }
+  .team-card:nth-child(5) { animation-delay: .25s; }
+  .team-card.leader { border-color: rgba(191,151,87,0.55); }
+  .team-card.leader::before { content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: radial-gradient(circle, rgba(191,151,87,0.22), transparent 70%); }
+  .crown-icon { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); font-size: 17px; animation: crownFloat 2s ease-in-out infinite; z-index: 2; }
+  .avatar-ring { width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 10px; position: relative; padding: 3px; background: conic-gradient(from 0deg, #BF9757, #e8d5b0, #BF9757); }
+  .team-card:not(.leader) .avatar-ring { background: #2a2a2a; }
+  .avatar-img-wrap { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #1a1a1c; border: 2px solid #0e0f11; }
+  .avatar-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .team-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .team-role { font-size: 11px; color: #777; margin-bottom: 8px; }
+  .team-daily { font-size: 17px; font-weight: 700; color: #e8d5b0; }
+  .team-daily-label { font-size: 10px; color: #666; margin-top: 1px; }
+  .team-rank-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #1c1c1e; color: #888; }
+  .team-rank-badge.gold { background: linear-gradient(135deg, #f4d27a, #BF9757); color: #2a1f0d; }
+  .team-rank-badge.silver { background: #b9b9b9; color: #1a1a1a; }
+  .team-rank-badge.bronze { background: #a36a3e; color: #1a1a1a; }
 
   /* ===== MAIN GRID ===== */
-  .main-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; align-items: start; }
-  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+  .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } .team-strip { grid-template-columns: repeat(3,1fr); } }
 
-  .panel { background: #131313; border: 1px solid #232323; border-radius: 18px; padding: 1.4rem; }
-  .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .panel-title h2 { font-size: 17px; font-weight: 700; }
-  .panel-title .tag { font-size: 11px; color: #BF9757; background: #2a1f0d; border: 1px solid #BF9757; border-radius: 20px; padding: 3px 12px; font-weight: 700; }
+  .panel {
+    background: linear-gradient(160deg, #131418 0%, #0e0f11 100%);
+    border: 1px solid #222226;
+    border-radius: 20px;
+    padding: 1.5rem;
+    animation: fadeUp .6s ease .1s backwards;
+  }
+  .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+  .panel-title h2 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .panel-title h2::before { content: ''; width: 6px; height: 16px; border-radius: 3px; background: #BF9757; display: inline-block; }
+  .panel-title .tag { font-size: 11px; color: #BF9757; background: rgba(191,151,87,0.12); border: 1px solid rgba(191,151,87,0.4); border-radius: 20px; padding: 4px 13px; font-weight: 700; }
 
-  /* chart panel */
-  .chart-wrap { position: relative; height: 300px; }
-  .legend-row { display: flex; justify-content: center; gap: 28px; margin-top: 10px; font-size: 13px; color: #999; }
+  .chart-wrap { position: relative; height: 270px; }
+  .legend-row { display: flex; justify-content: center; gap: 30px; margin-top: 12px; font-size: 13px; color: #999; }
   .legend-item { display: flex; align-items: center; gap: 7px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
 
-  /* slider panel */
-  .timer-bar { height: 4px; background: #232323; border-radius: 3px; margin-bottom: 1rem; overflow: hidden; }
-  .timer-fill { height: 100%; background: #BF9757; width: 0%; transition: width linear; }
-  .slide { display: none; animation: fadeIn .45s ease; }
-  .slide.active { display: block; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
-  .slide-name { font-size: 22px; font-weight: 700; }
+  .sub-panel { margin-top: 18px; background: #0d0e10; border: 1px solid #1d1d1f; border-radius: 16px; padding: 1.2rem; }
+  .sub-panel-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #ddd; }
+
+  .lb-row { display: flex; align-items: center; gap: 12px; padding: 9px 4px; border-bottom: .5px solid #1c1c1c; }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { width: 26px; height: 26px; border-radius: 9px; background: #1a1a1c; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #888; flex-shrink: 0; }
+  .lb-rank.r1 { background: linear-gradient(135deg, #f4d27a, #BF9757); color: #2a1f0d; }
+  .lb-rank.r2 { background: #b9b9b9; color: #1a1a1a; }
+  .lb-rank.r3 { background: #a36a3e; color: #1a1a1a; }
+  .lb-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .lb-bar-mini { width: 60px; height: 5px; background: #1d1d1f; border-radius: 4px; overflow: hidden; }
+  .lb-bar-mini-fill { height: 100%; background: #BF9757; border-radius: 4px; }
+  .lb-val { font-size: 13px; font-weight: 700; color: #e8d5b0; white-space: nowrap; min-width: 85px; text-align: left; }
+
+  .timer-bar { height: 4px; background: #1d1d1f; border-radius: 3px; margin-bottom: 1.1rem; overflow: hidden; }
+  .timer-fill { height: 100%; background: linear-gradient(90deg, #8a6d3e, #BF9757); width: 0%; transition: width linear; }
+  .slide { display: none; }
+  .slide.active { display: block; animation: fadeUp .45s ease; }
+  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 8px; }
+  .slide-person { display: flex; align-items: center; gap: 12px; }
+  .slide-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #1a1a1c; border: 2px solid #BF9757; flex-shrink: 0; }
+  .slide-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .slide-avatar.no-img { display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #BF9757; background: rgba(191,151,87,0.12); }
+  .slide-name { font-size: 21px; font-weight: 700; }
   .slide-sub { font-size: 13px; color: #777; margin-top: 2px; }
   .badge { font-size: 12px; padding: 5px 14px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
-  .badge-gold { background: #BF9757; color: #2a1f0d; }
-  .badge-total { background: #2a1f0d; border: 1px solid #BF9757; color: #BF9757; }
-  .progress-overall { display: flex; align-items: center; gap: 10px; margin-bottom: 1.1rem; }
+  .badge-gold { background: linear-gradient(135deg, #e8d5b0, #BF9757); color: #2a1f0d; }
+  .badge-total { background: rgba(191,151,87,0.12); border: 1px solid #BF9757; color: #BF9757; }
+  .progress-overall { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; background: #0d0e10; border: 1px solid #1d1d1f; border-radius: 12px; padding: 10px 14px; }
   .progress-overall .label { font-size: 13px; color: #999; white-space: nowrap; }
-  .progress-overall .track { flex: 1; height: 8px; background: #232323; border-radius: 8px; overflow: hidden; }
-  .progress-overall .fillp { height: 100%; background: #BF9757; border-radius: 8px; transition: width .5s ease; }
-  .progress-overall .pct { font-size: 14px; font-weight: 700; color: #BF9757; min-width: 40px; text-align: left; }
-  .rows { display: flex; flex-direction: column; gap: 9px; max-height: 380px; overflow: hidden; }
+  .progress-overall .track { flex: 1; height: 9px; background: #1d1d1f; border-radius: 8px; overflow: hidden; }
+  .progress-overall .fillp { height: 100%; background: linear-gradient(90deg, #8a6d3e, #BF9757); border-radius: 8px; transition: width .6s ease; }
+  .progress-overall .pct { font-size: 15px; font-weight: 700; color: #e8d5b0; min-width: 42px; text-align: left; }
+  .rows { display: flex; flex-direction: column; gap: 9px; }
   .ri { display: flex; align-items: center; gap: 10px; }
-  .rl { width: 130px; min-width: 100px; font-size: 14px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
-  .bo { flex: 1; height: 24px; background: #1c1c1c; border-radius: 24px; position: relative; overflow: hidden; border: .5px solid #2a2a2a; }
-  .bi { height: 100%; border-radius: 24px; background: #BF9757; }
-  .bm { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #fff; font-weight: 700; }
-  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.1rem; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: 1px solid #3a3a3a; transition: background .3s; }
-  .dot.active { background: #BF9757; }
-
-  /* leaderboard panel */
-  .lb-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: .5px solid #1f1f1f; }
-  .lb-row:last-child { border-bottom: none; }
-  .lb-rank { width: 26px; height: 26px; border-radius: 8px; background: #1c1c1c; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #888; flex-shrink: 0; }
-  .lb-rank.gold { background: #BF9757; color: #2a1f0d; }
-  .lb-name { flex: 1; font-size: 14px; font-weight: 500; }
-  .lb-val { font-size: 14px; font-weight: 700; color: #BF9757; white-space: nowrap; }
+  .rl { width: 125px; min-width: 95px; font-size: 13.5px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
+  .bo { flex: 1; height: 24px; background: #16171a; border-radius: 24px; position: relative; overflow: hidden; border: .5px solid #262626; }
+  .bi { height: 100%; border-radius: 24px; background: linear-gradient(90deg, #8a6d3e, #BF9757); transition: width .6s ease; }
+  .bm { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12.5px; color: #fff; font-weight: 700; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.2rem; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: 1px solid #3a3a3a; transition: all .3s; }
+  .dot.active { background: #BF9757; box-shadow: 0 0 8px rgba(191,151,87,0.6); transform: scale(1.3); }
 
   .loading, .err { text-align: center; padding: 3rem; color: #666; font-size: 16px; }
   .err { color: #e24b4a; }
 </style>
 </head>
 <body>
+<div class="stage">
 
 <div class="topbar">
   <div class="brand">
-    <div class="brand-mark">RE</div>
+    <div class="brand-mark"><img src="https://amozeshamlak.com/wp-content/uploads/2026/05/oe-w-name-01-1-e1777970042185.png" alt="لوگو" /></div>
     <div class="brand-text">
       <h1>داشبورد مدیریتی فروش</h1>
-      <p>عملکرد لحظه‌ای تیم فروش</p>
+      <p>اتاق فرمان عملکرد تیم فروش</p>
     </div>
   </div>
-  <div style="display:flex; align-items:center; gap:14px;">
-    <span class="clock-text" id="clockText"></span>
+  <div class="top-right">
+    <div class="clock-box">
+      <div class="clock-time" id="clockTime"></div>
+      <div class="clock-date" id="clockDate"></div>
+    </div>
     <div class="live-pill"><span class="live-dot"></span>زنده — متصل به Google Sheets</div>
   </div>
 </div>
@@ -117,6 +203,8 @@
 <div class="kpi-row" id="kpiRow">
   <div class="loading">در حال بارگذاری شاخص‌ها...</div>
 </div>
+
+<div class="team-strip" id="teamStrip"></div>
 
 <div class="main-grid">
   <div class="panel">
@@ -132,8 +220,8 @@
       <div class="legend-item"><span class="legend-dot" style="background:#7d7d7d;"></span>قسط</div>
     </div>
 
-    <div class="panel" style="margin-top: 16px; background:#0f0f0f;">
-      <div class="panel-title"><h2 style="font-size:15px;">رتبه‌بندی فروش امروز</h2></div>
+    <div class="sub-panel">
+      <div class="sub-panel-title">رتبه‌بندی فروش امروز</div>
       <div id="leaderboard"></div>
     </div>
   </div>
@@ -149,16 +237,24 @@
   </div>
 </div>
 
+</div>
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREbVqCizGPAJxn42P6HMEOWXwC8M7YZulA33gH9MplFbhbHxWn6UIxzxIn765HwvPhLBVJ-L6GO2Gb/pub?output=csv";
 const SLIDE_INTERVAL = 15000;
 const AUTO_REFRESH_MS = 10 * 1000;
 
+const PHOTOS = {
+  "شهرزاد دستجردی": "https://amozeshamlak.com/wp-content/uploads/2026/04/dastjerd-1-scaled.webp",
+  "نازنین وزیری": "https://amozeshamlak.com/wp-content/uploads/2026/04/vazir.webp",
+  "فاطمه پرسشی": "https://amozeshamlak.com/wp-content/uploads/2026/04/porsesh-scaled.webp",
+  "زهرا آذر": "https://amozeshamlak.com/wp-content/uploads/2026/04/azar-scaled.webp",
+  "زهرا حسین زاده": "https://amozeshamlak.com/wp-content/uploads/2026/05/IMG_20260426_125219-3.png"
+};
+
 let cur = 0, playing = true, timer = null, people = [];
 let salesChartInstance = null;
 const fill = document.getElementById('timerFill');
 
-/* ---------- CSV parsing ---------- */
 function parseCSV(text) {
   const rows = [];
   let row = [], field = '', inQuotes = false;
@@ -195,18 +291,17 @@ function parseNumber(str) {
   return isNaN(n) ? 0 : n;
 }
 function formatNum(n) { return Number(n || 0).toLocaleString('en-US'); }
+function initials(name) { return name.trim().split(' ')[0].charAt(0); }
 
-/* ---------- data shaping ---------- */
 function getDailyMap(rows) {
-  const sales = {}, installment = {}, order = [];
+  const sales = {}, installment = {};
   rows.forEach(row => {
     const name = row['Foroosh'];
     if (!name) return;
-    if (!(name in sales)) order.push(name);
     sales[name] = parseNumber(row['valueF']);
     installment[name] = parseNumber(row['ValueG']);
   });
-  return { sales, installment, order };
+  return { sales, installment };
 }
 
 function groupByPerson(rows, dailySales, dailyInstallment) {
@@ -220,6 +315,7 @@ function groupByPerson(rows, dailySales, dailyInstallment) {
   result.forEach(p => {
     p.daily = dailySales[p.name] || 0;
     p.installmentToday = dailyInstallment[p.name] || 0;
+    p.photo = PHOTOS[p.name] || null;
   });
   const allP = {};
   result.forEach(p => p.items.forEach(item => {
@@ -232,26 +328,45 @@ function groupByPerson(rows, dailySales, dailyInstallment) {
   return result;
 }
 
-/* ---------- KPI cards ---------- */
 function renderKPIs(people) {
   const team = people.find(p => p.isTotal);
   const sold = team.items.reduce((a,b)=>a+b.v,0);
   const maxT = team.items.reduce((a,b)=>a+b.m,0);
   const pct = maxT ? Math.round(sold/maxT*100) : 0;
   const cards = [
-    { label: 'فروش امروز تیم', value: formatNum(team.daily), unit: 'تومان' },
-    { label: 'قسط امروز تیم', value: formatNum(team.installmentToday), unit: 'تومان' },
-    { label: 'پیشرفت کلی هدف', value: pct + '%', unit: '' },
-    { label: 'تعداد کارشناسان فعال', value: people.length - 1, unit: 'نفر' }
+    { label: 'فروش امروز تیم', value: formatNum(team.daily), unit: 'تومان', bar: null },
+    { label: 'قسط امروز تیم', value: formatNum(team.installmentToday), unit: 'تومان', bar: null },
+    { label: 'پیشرفت کلی هدف', value: pct + '%', unit: '', bar: pct },
+    { label: 'تعداد کارشناسان فعال', value: people.length - 1, unit: 'نفر', bar: null }
   ];
   document.getElementById('kpiRow').innerHTML = cards.map(c => `
     <div class="kpi-card">
       <div class="kpi-label">${c.label}</div>
       <div class="kpi-value">${c.value}${c.unit ? `<span class="unit">${c.unit}</span>` : ''}</div>
+      ${c.bar !== null ? `<div class="kpi-bar"><div class="kpi-bar-fill" style="width:${c.bar}%;"></div></div>` : ''}
     </div>`).join('');
 }
 
-/* ---------- chart ---------- */
+function renderTeamStrip(people) {
+  const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
+  const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+  const html = persons.map((p, i) => `
+    <div class="team-card ${i===0 ? 'leader' : ''}">
+      ${i===0 ? '<div class="crown-icon">👑</div>' : ''}
+      <div class="team-rank-badge ${rankClass(i)}">${i+1}</div>
+      <div class="avatar-ring">
+        <div class="avatar-img-wrap">
+          ${p.photo ? `<img src="${p.photo}" alt="${p.name}" />` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#BF9757;">${initials(p.name)}</div>`}
+        </div>
+      </div>
+      <div class="team-name">${p.name}</div>
+      <div class="team-role">${p.badge}</div>
+      <div class="team-daily">${formatNum(p.daily)}</div>
+      <div class="team-daily-label">تومان فروش امروز</div>
+    </div>`).join('');
+  document.getElementById('teamStrip').innerHTML = html;
+}
+
 function renderChart(people) {
   const persons = people.filter(p => !p.isTotal);
   const labels = persons.map(p => p.name);
@@ -265,8 +380,8 @@ function renderChart(people) {
     data: {
       labels,
       datasets: [
-        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 36 },
-        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 36 }
+        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 32 },
+        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 32 }
       ]
     },
     options: {
@@ -274,31 +389,30 @@ function renderChart(people) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' }
-        }
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' } }
       },
       scales: {
-        x: { ticks: { color: '#bbb', font: { family: 'Vazirmatn', size: 12 } }, grid: { display: false } },
-        y: { ticks: { color: '#777', font: { size: 11 }, callback: (v) => formatNum(v) }, grid: { color: '#1d1d1d' } }
+        x: { ticks: { color: '#bbb', font: { family: 'Vazirmatn', size: 11 } }, grid: { display: false } },
+        y: { ticks: { color: '#777', font: { size: 11 }, callback: (v) => formatNum(v) }, grid: { color: '#1a1a1c' } }
       }
     }
   });
 }
 
-/* ---------- leaderboard ---------- */
 function renderLeaderboard(people) {
   const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
+  const maxVal = Math.max(...persons.map(p => p.daily), 1);
+  const rankClass = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
   const html = persons.map((p, i) => `
     <div class="lb-row">
-      <div class="lb-rank ${i===0?'gold':''}">${i+1}</div>
+      <div class="lb-rank ${rankClass(i)}">${i+1}</div>
       <div class="lb-name">${p.name}</div>
+      <div class="lb-bar-mini"><div class="lb-bar-mini-fill" style="width:${Math.round(p.daily/maxVal*100)}%;"></div></div>
       <div class="lb-val">${formatNum(p.daily)} تومان</div>
     </div>`).join('');
   document.getElementById('leaderboard').innerHTML = html;
 }
 
-/* ---------- product slides ---------- */
 function buildSlide(p, idx) {
   const sold = p.items.reduce((a,b) => a+b.v, 0);
   const maxT = p.items.reduce((a,b) => a+b.m, 0);
@@ -307,9 +421,15 @@ function buildSlide(p, idx) {
     const ip = item.m ? Math.min(Math.round(item.v/item.m*100),100) : 0;
     return `<div class="ri"><div class="rl">${item.t}</div><div class="bo"><div class="bi" style="width:${ip}%;"></div><div class="bm">${item.v} / ${item.m}</div></div></div>`;
   }).join('');
+  const avatarHtml = p.isTotal
+    ? `<div class="slide-avatar no-img">👥</div>`
+    : (p.photo ? `<div class="slide-avatar"><img src="${p.photo}" alt="${p.name}" /></div>` : `<div class="slide-avatar no-img">${initials(p.name)}</div>`);
   return `<div class="slide${idx===0?' active':''}" id="slide${idx}">
     <div class="slide-header">
-      <div><div class="slide-name">${p.name}</div><div class="slide-sub">${p.badge}</div></div>
+      <div class="slide-person">
+        ${avatarHtml}
+        <div><div class="slide-name">${p.name}</div><div class="slide-sub">${p.badge}</div></div>
+      </div>
       <div class="badge ${p.isTotal?'badge-total':'badge-gold'}">${p.isTotal?'گزارش مدیریتی':'گزارش فروش'}</div>
     </div>
     <div class="progress-overall">
@@ -341,17 +461,14 @@ function resetFill() {
 function startPlay() { clearInterval(timer); timer = setInterval(next, SLIDE_INTERVAL); resetFill(); }
 function stopPlay() { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0%'; }
 
-/* ---------- clock ---------- */
 function updateClock() {
   const now = new Date();
-  const time = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const date = now.toLocaleDateString('fa-IR');
-  document.getElementById('clockText').textContent = date + ' — ' + time;
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('clockDate').textContent = now.toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-/* ---------- main load ---------- */
 async function loadData() {
   try {
     const res = await fetch(CSV_URL);
@@ -363,6 +480,7 @@ async function loadData() {
     people = groupByPerson(rows, sales, installment);
     cur = Math.min(prevCur, people.length - 1);
     renderKPIs(people);
+    renderTeamStrip(people);
     renderChart(people);
     renderLeaderboard(people);
     renderSlides();
