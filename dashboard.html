@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>داشبورد مدیریتی فروش</title>
+<title>گزارش تیم فروش</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -115,8 +115,8 @@
   .team-rank-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #1c1c1e; color: #888; }
 
   /* ===== MAIN GRID ===== */
-  .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
-  @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } .team-strip { grid-template-columns: repeat(3,1fr); } }
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } }
 
   .panel {
     background: linear-gradient(160deg, #131418 0%, #0d0e10 100%);
@@ -211,7 +211,7 @@
   <div class="brand">
     <div class="brand-mark"><img src="https://amozeshamlak.com/wp-content/uploads/2026/05/oe-w-name-01-1-e1777970042185.png" alt="لوگو" /></div>
     <div class="brand-text">
-      <h1>داشبورد مدیریتی فروش</h1>
+      <h1>گزارش تیم فروش</h1>
       <p>اتاق فرمان عملکرد تیم فروش</p>
     </div>
   </div>
@@ -228,10 +228,7 @@
   <div class="loading">در حال بارگذاری شاخص‌ها...</div>
 </div>
 
-<div class="section-label"><div class="num">۱</div><div class="txt">رتبه‌بندی تیم فروش</div><div class="line"></div></div>
-<div class="team-strip" id="teamStrip"></div>
-
-<div class="section-label"><div class="num">۲</div><div class="txt">فروش، قسط و گزارش تفصیلی</div><div class="line"></div></div>
+<div class="section-label"><div class="num">۱</div><div class="txt">فروش، قسط و گزارش تفصیلی</div><div class="line"></div></div>
 <div class="main-grid">
   <div class="panel">
     <div class="panel-title">
@@ -263,7 +260,7 @@
   </div>
 </div>
 
-<div class="section-label"><div class="num">۳</div><div class="txt">گزارش فعالیت CRM</div><div class="line"></div></div>
+<div class="section-label"><div class="num">۲</div><div class="txt">گزارش فعالیت CRM</div><div class="line"></div></div>
 <div class="panel activity-panel">
   <div class="panel-title">
     <h2>فعالیت روزانه تیم در CRM</h2>
@@ -457,24 +454,6 @@ function renderKPIs(people) {
     </div>`).join('');
 }
 
-function renderTeamStrip(people) {
-  const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
-  const html = persons.map((p, i) => `
-    <div class="team-card">
-      <div class="team-rank-badge">${i+1}</div>
-      <div class="avatar-ring">
-        <div class="avatar-img-wrap">
-          ${p.photo ? `<img src="${p.photo}" alt="${p.name}" />` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#BF9757;">${initials(p.name)}</div>`}
-        </div>
-      </div>
-      <div class="team-name">${p.name}</div>
-      <div class="team-role">${p.badge}</div>
-      <div class="team-daily">${formatNum(p.daily)}</div>
-      <div class="team-daily-label">تومان فروش امروز</div>
-    </div>`).join('');
-  document.getElementById('teamStrip').innerHTML = html;
-}
-
 function renderChart(people) {
   const persons = people.filter(p => !p.isTotal);
   const labels = persons.map(p => p.name);
@@ -596,7 +575,6 @@ async function loadData() {
     people = groupByPerson(rows, sales, installment);
     cur = Math.min(prevCur, people.length - 1);
     renderKPIs(people);
-    renderTeamStrip(people);
     renderChart(people);
     renderLeaderboard(people);
     renderSlides();
