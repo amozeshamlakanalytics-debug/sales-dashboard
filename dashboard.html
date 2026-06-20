@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>گزارش تیم فروش</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script type="text/javascript" src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+<script type="text/javascript" src="https://cdn.amcharts.com/lib/3/serial.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -233,7 +233,7 @@
       <span class="tag">امروز</span>
     </div>
     <div class="chart-wrap">
-      <canvas id="salesChart" role="img" aria-label="نمودار ستونی فروش و قسط امروز هر کارشناس فروش">نمودار فروش و قسط روزانه</canvas>
+      <div id="salesChart3d" style="width:100%; height:100%;" role="img" aria-label="نمودار سه‌بعدی فروش و قسط امروز هر کارشناس فروش"></div>
     </div>
     <div class="legend-row">
       <div class="legend-item"><span class="legend-dot" style="background:#FCD202;"></span>فروش</div>
@@ -302,12 +302,8 @@ const ACTIVITY_COLUMN_MAP = {
 };
 const ACTIVITY_COLUMN_ORDER = Object.keys(ACTIVITY_COLUMN_MAP);
 
-if (typeof ChartDataLabels !== 'undefined') {
-  Chart.register(ChartDataLabels);
-}
-
 let cur = 0, playing = true, timer = null, people = [];
-let salesChartInstance = null;
+
 const fill = document.getElementById('timerFill');
 
 function parseCSV(text) {
@@ -436,42 +432,73 @@ function renderActivity(users) {
   }).join('');
 }
 
+function nowLabel() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  const date = now.toLocaleDateString('fa-IR');
+  return "ساعت " + time + " روز " + date;
+}
+
 function renderChart(people) {
   const persons = people.filter(p => !p.isTotal);
-  const labels = persons.map(p => p.name);
-  const salesData = persons.map(p => p.daily);
-  const installmentData = persons.map(p => p.installmentToday);
+  const dataProvider = persons.map(p => ({
+    category: p.name,
+    sales: p.daily,
+    installment: p.installmentToday
+  }));
 
-  if (salesChartInstance) salesChartInstance.destroy();
-  const ctx = document.getElementById('salesChart');
-  salesChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 46, datalabels: { color: '#1a1a1a' } },
-        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 46, datalabels: { color: '#fff' } }
-      ]
+  AmCharts.makeChart("salesChart3d", {
+    "type": "serial",
+    "categoryField": "category",
+    "angle": 30,
+    "depth3D": 20,
+    "startDuration": 1,
+    "fontFamily": "Vazirmatn",
+    "fontSize": 16,
+    "theme": "default",
+    "backgroundColor": "#131418",
+    "backgroundAlpha": 0,
+    "color": "#ddd",
+    "categoryAxis": {
+      "gridPosition": "start",
+      "color": "#ddd",
+      "axisColor": "#333",
+      "gridAlpha": 0
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' } },
-        datalabels: {
-          anchor: 'end',
-          align: 'top',
-          color: '#fff',
-          font: { family: 'Vazirmatn', size: 14, weight: '700' },
-          formatter: (value) => value ? formatNum(value) : ''
-        }
+    "chartCursor": { "enabled": true },
+    "graphs": [
+      {
+        "balloonText": "[[title]] of [[category]]: [[value]]",
+        "fillAlphas": 1,
+        "id": "AmGraph-1",
+        "title": "فروش",
+        "type": "column",
+        "valueField": "sales",
+        "fillColors": "#FCD202",
+        "labelText": "[[value]]",
+        "labelPosition": "middle",
+        "labelColor": "#1a1a1a",
+        "showAllValueLabels": true
       },
-      scales: {
-        x: { ticks: { color: '#ddd', font: { family: 'Vazirmatn', size: 16, weight: '700' } }, grid: { display: false } },
-        y: { display: false, beginAtZero: true }
+      {
+        "balloonText": "[[title]] of [[category]]: [[value]]",
+        "fillAlphas": 1,
+        "id": "AmGraph-2",
+        "title": "قسط",
+        "type": "column",
+        "valueField": "installment",
+        "fillColors": "#999999",
+        "labelText": "[[value]]",
+        "labelPosition": "middle",
+        "labelColor": "#fff",
+        "showAllValueLabels": true
       }
-    }
+    ],
+    "valueAxes": [{ "id": "ValueAxis-1", "labelsEnabled": false, "gridAlpha": 0, "axisAlpha": 0 }],
+    "legend": { "enabled": false },
+    "balloon": { "adjustBorderColor": true },
+    "titles": [{ "id": "Title-1", "size": 15, "color": "#999", "text": nowLabel() }],
+    "dataProvider": dataProvider
   });
 }
 
