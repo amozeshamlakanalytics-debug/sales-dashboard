@@ -3,201 +3,374 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>داشبورد فروش تیم</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<title>داشبورد مدیریتی فروش</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
+  html, body {
     font-family: 'Vazirmatn', sans-serif;
-    background: #0f0f0f;
+    background: #0a0a0a;
     color: #fff;
-    min-height: 100vh;
-    padding: 1.5rem;
     direction: rtl;
+    overflow-x: hidden;
   }
-  .timer-bar { height: 4px; background: #2a2a2a; border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+  body {
+    padding: 1.6rem 2.4rem 2rem;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 8% 8%, rgba(191,151,87,0.07), transparent 35%),
+      radial-gradient(circle at 92% 92%, rgba(191,151,87,0.05), transparent 35%),
+      #0a0a0a;
+  }
+
+  /* ===== TOP BAR ===== */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #BF9757, #8a6d3e); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: #0a0a0a; flex-shrink: 0; }
+  .brand-text h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand-text p { font-size: 13px; color: #888; margin-top: 2px; }
+  .live-pill { display: flex; align-items: center; gap: 8px; background: #161616; border: 1px solid #2a2a2a; border-radius: 30px; padding: 7px 18px; font-size: 13px; color: #aaa; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 8px #3ecf6e; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  .clock-text { font-size: 13px; color: #666; font-weight: 500; }
+
+  /* ===== KPI ROW ===== */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.6rem; }
+  .kpi-card { background: #131313; border: 1px solid #232323; border-radius: 16px; padding: 1.1rem 1.3rem; position: relative; overflow: hidden; }
+  .kpi-card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: #BF9757; }
+  .kpi-label { font-size: 13px; color: #888; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .kpi-value { font-size: 30px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .kpi-value .unit { font-size: 14px; color: #999; font-weight: 500; margin-right: 4px; }
+  .kpi-sub { font-size: 12px; color: #BF9757; margin-top: 4px; font-weight: 500; }
+
+  /* ===== MAIN GRID ===== */
+  .main-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .panel { background: #131313; border: 1px solid #232323; border-radius: 18px; padding: 1.4rem; }
+  .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .panel-title h2 { font-size: 17px; font-weight: 700; }
+  .panel-title .tag { font-size: 11px; color: #BF9757; background: #2a1f0d; border: 1px solid #BF9757; border-radius: 20px; padding: 3px 12px; font-weight: 700; }
+
+  /* chart panel */
+  .chart-wrap { position: relative; height: 300px; }
+  .legend-row { display: flex; justify-content: center; gap: 28px; margin-top: 10px; font-size: 13px; color: #999; }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* slider panel */
+  .timer-bar { height: 4px; background: #232323; border-radius: 3px; margin-bottom: 1rem; overflow: hidden; }
   .timer-fill { height: 100%; background: #BF9757; width: 0%; transition: width linear; }
-  .slide { display: none; animation: fadeIn .5s ease; }
+  .slide { display: none; animation: fadeIn .45s ease; }
   .slide.active { display: block; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 8px; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
   .slide-name { font-size: 22px; font-weight: 700; }
-  .slide-sub { font-size: 12px; color: #888; margin-top: 3px; }
-  .badge { font-size: 11px; padding: 4px 14px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
-  .badge-gold { background: #BF9757; color: #fff; }
+  .slide-sub { font-size: 13px; color: #777; margin-top: 2px; }
+  .badge { font-size: 12px; padding: 5px 14px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+  .badge-gold { background: #BF9757; color: #2a1f0d; }
   .badge-total { background: #2a1f0d; border: 1px solid #BF9757; color: #BF9757; }
-  .sum-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 1.2rem; }
-  .sc { background: #1a1a1a; border-radius: 8px; padding: .6rem .8rem; text-align: center; border: .5px solid #2a2a2a; }
-  .sn { font-size: 20px; font-weight: 700; color: #BF9757; }
-  .sl { font-size: 11px; color: #666; margin-top: 2px; }
-  .dv { height: .5px; background: #2a2a2a; margin: 0 0 1rem; }
-  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .progress-overall { display: flex; align-items: center; gap: 10px; margin-bottom: 1.1rem; }
+  .progress-overall .label { font-size: 13px; color: #999; white-space: nowrap; }
+  .progress-overall .track { flex: 1; height: 8px; background: #232323; border-radius: 8px; overflow: hidden; }
+  .progress-overall .fillp { height: 100%; background: #BF9757; border-radius: 8px; transition: width .5s ease; }
+  .progress-overall .pct { font-size: 14px; font-weight: 700; color: #BF9757; min-width: 40px; text-align: left; }
+  .rows { display: flex; flex-direction: column; gap: 9px; max-height: 380px; overflow: hidden; }
   .ri { display: flex; align-items: center; gap: 10px; }
-  .rl { width: 150px; min-width: 100px; font-size: 13px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
-  .bo { flex: 1; height: 26px; background: #1a1a1a; border-radius: 30px; position: relative; overflow: hidden; border: .5px solid #2a2a2a; }
-  .bi { height: 100%; border-radius: 30px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; background: #BF9757; }
-  .bv { font-size: 12px; font-weight: 700; color: #fff; }
-  .bm { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #555; font-weight: 500; }
-  .pp { min-width: 38px; text-align: left; font-size: 12px; color: #666; font-weight: 500; flex-shrink: 0; }
-  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.2rem; flex-wrap: wrap; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: .5px solid #333; transition: background .3s; }
+  .rl { width: 130px; min-width: 100px; font-size: 14px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
+  .bo { flex: 1; height: 24px; background: #1c1c1c; border-radius: 24px; position: relative; overflow: hidden; border: .5px solid #2a2a2a; }
+  .bi { height: 100%; border-radius: 24px; background: #BF9757; }
+  .bm { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #fff; font-weight: 700; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.1rem; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: 1px solid #3a3a3a; transition: background .3s; }
   .dot.active { background: #BF9757; }
-  .nav-btns { display: flex; gap: 8px; justify-content: center; margin-top: .5rem; }
-  .nbtn { background: #1a1a1a; color: #BF9757; border: .5px solid #BF9757; border-radius: 20px; padding: 5px 16px; font-size: 12px; font-family: 'Vazirmatn', sans-serif; cursor: pointer; }
-  .nbtn:hover { background: #2a1f0d; }
-  .loading { text-align: center; padding: 3rem; color: #666; font-size: 16px; }
-  .error { text-align: center; padding: 2rem; color: #e24b4a; font-size: 14px; }
-  .refresh-info { text-align: center; font-size: 11px; color: #444; margin-top: .5rem; }
+
+  /* leaderboard panel */
+  .lb-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: .5px solid #1f1f1f; }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { width: 26px; height: 26px; border-radius: 8px; background: #1c1c1c; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #888; flex-shrink: 0; }
+  .lb-rank.gold { background: #BF9757; color: #2a1f0d; }
+  .lb-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .lb-val { font-size: 14px; font-weight: 700; color: #BF9757; white-space: nowrap; }
+
+  .loading, .err { text-align: center; padding: 3rem; color: #666; font-size: 16px; }
+  .err { color: #e24b4a; }
 </style>
 </head>
 <body>
 
-<div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-<div id="slidesWrap"><div class="loading">در حال دریافت اطلاعات از Google Sheets...</div></div>
-<div class="nav" id="navDots"></div>
-<div class="nav-btns">
-  <button class="nbtn" id="btnPrev">→ قبلی</button>
-  <button class="nbtn" id="btnPlay">⏸ توقف</button>
-  <button class="nbtn" id="btnNext">بعدی ←</button>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">RE</div>
+    <div class="brand-text">
+      <h1>داشبورد مدیریتی فروش</h1>
+      <p>عملکرد لحظه‌ای تیم فروش</p>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <span class="clock-text" id="clockText"></span>
+    <div class="live-pill"><span class="live-dot"></span>زنده — متصل به Google Sheets</div>
+  </div>
 </div>
-<div class="refresh-info" id="refreshInfo"></div>
+
+<div class="kpi-row" id="kpiRow">
+  <div class="loading">در حال بارگذاری شاخص‌ها...</div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">
+      <h2>فروش و قسط روزانه هر کارشناس</h2>
+      <span class="tag">امروز</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="salesChart" role="img" aria-label="نمودار ستونی فروش و قسط امروز هر کارشناس فروش">نمودار فروش و قسط روزانه</canvas>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><span class="legend-dot" style="background:#FCD202;"></span>فروش</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7d7d7d;"></span>قسط</div>
+    </div>
+
+    <div class="panel" style="margin-top: 16px; background:#0f0f0f;">
+      <div class="panel-title"><h2 style="font-size:15px;">رتبه‌بندی فروش امروز</h2></div>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">
+      <h2>گزارش تفصیلی محصولات</h2>
+      <span class="tag">به ترتیب</span>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    <div id="slidesWrap"><div class="loading">در حال دریافت اطلاعات...</div></div>
+    <div class="nav" id="navDots"></div>
+  </div>
+</div>
 
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREbVqCizGPAJxn42P6HMEOWXwC8M7YZulA33gH9MplFbhbHxWn6UIxzxIn765HwvPhLBVJ-L6GO2Gb/pub?output=csv";
-const INTERVAL = 7000;
-const AUTO_REFRESH_MS = 5 * 60 * 1000; // هر ۵ دقیقه از شیت میخونه
+const SLIDE_INTERVAL = 15000;
+const AUTO_REFRESH_MS = 10 * 1000;
 
 let cur = 0, playing = true, timer = null, people = [];
+let salesChartInstance = null;
 const fill = document.getElementById('timerFill');
 
+/* ---------- CSV parsing ---------- */
 function parseCSV(text) {
-  const lines = text.trim().split('\n').map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g, '')));
-  const headers = lines[0];
-  return lines.slice(1).map(row => {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  const fullText = text.replace(/\r/g, '');
+  let i = 0;
+  while (i < fullText.length) {
+    const c = fullText[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (fullText[i+1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    } else {
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { row.push(field); field = ''; i++; continue; }
+      if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+      field += c; i++; continue;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  const filtered = rows.filter(r => r.some(c => c.trim() !== ''));
+  const headers = filtered[0].map(h => h.trim());
+  return filtered.slice(1).map(r => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i] || '');
+    headers.forEach((h,i) => obj[h] = (r[i] || '').trim());
     return obj;
   });
 }
+function parseNumber(str) {
+  if (!str) return 0;
+  const cleaned = String(str).replace(/[,\s]/g, '');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+function formatNum(n) { return Number(n || 0).toLocaleString('en-US'); }
 
-function groupByPerson(rows) {
-  const map = {};
-  const order = [];
+/* ---------- data shaping ---------- */
+function getDailyMap(rows) {
+  const sales = {}, installment = {}, order = [];
   rows.forEach(row => {
-    const name = row['name'];
+    const name = row['Foroosh'];
     if (!name) return;
-    if (!map[name]) {
-      map[name] = { name, badge: row['badge'] || 'کارشناس فروش', items: [] };
-      order.push(name);
-    }
-    map[name].items.push({
-      t: row['product'],
-      v: parseFloat(row['value']) || 0,
-      m: parseFloat(row['max']) || 1
-    });
+    if (!(name in sales)) order.push(name);
+    sales[name] = parseNumber(row['valueF']);
+    installment[name] = parseNumber(row['ValueG']);
+  });
+  return { sales, installment, order };
+}
+
+function groupByPerson(rows, dailySales, dailyInstallment) {
+  const map = {}, order = [];
+  rows.forEach(row => {
+    const name = row['name']; if (!name) return;
+    if (!map[name]) { map[name] = { name, badge: row['badge']||'کارشناس فروش', items: [] }; order.push(name); }
+    map[name].items.push({ t: row['product'], v: parseNumber(row['value']), m: parseNumber(row['max']) || 1 });
   });
   const result = order.map(n => map[n]);
-
-  // ساخت اسلاید آمار کلی
-  const allProducts = {};
+  result.forEach(p => {
+    p.daily = dailySales[p.name] || 0;
+    p.installmentToday = dailyInstallment[p.name] || 0;
+  });
+  const allP = {};
   result.forEach(p => p.items.forEach(item => {
-    if (!allProducts[item.t]) allProducts[item.t] = { t: item.t, v: 0, m: 0 };
-    allProducts[item.t].v += item.v;
-    allProducts[item.t].m += item.m;
+    if (!allP[item.t]) allP[item.t] = { t: item.t, v: 0, m: 0 };
+    allP[item.t].v += item.v; allP[item.t].m += item.m;
   }));
-  result.push({ name: 'آمار کلی تیم', badge: 'مجموع ' + result.length + ' نفر', isTotal: true, items: Object.values(allProducts) });
+  const totalDaily = result.reduce((a, p) => a + (p.daily || 0), 0);
+  const totalInstallment = result.reduce((a, p) => a + (p.installmentToday || 0), 0);
+  result.push({ name: 'آمار کلی تیم', badge: 'مجموع ' + result.length + ' نفر', isTotal: true, items: Object.values(allP), daily: totalDaily, installmentToday: totalInstallment });
   return result;
 }
 
-function buildSlide(p, idx) {
-  const sold = p.items.reduce((a, b) => a + b.v, 0);
-  const maxT = p.items.reduce((a, b) => a + b.m, 0);
-  const pct = maxT ? Math.round(sold / maxT * 100) : 0;
-  const badgeClass = p.isTotal ? 'badge badge-total' : 'badge badge-gold';
-  const rows = p.items.map(item => {
-    const ip = item.m ? Math.min(Math.round(item.v / item.m * 100), 100) : 0;
-    return `<div class="ri">
-      <div class="rl">${item.t}</div>
-      <div class="bo">
-        <div class="bi" style="width:${ip}%;">
-          ${item.v > 0 ? `<span class="bv">${item.v}</span>` : ''}
-        </div>
-        <div class="bm">${item.m}</div>
-      </div>
-      <div class="pp">${ip}%</div>
-    </div>`;
-  }).join('');
-  return `<div class="slide${idx === 0 ? ' active' : ''}" id="slide${idx}">
-    <div class="slide-header">
-      <div>
-        <div class="slide-name">${p.name}</div>
-        <div class="slide-sub">${p.badge}</div>
-      </div>
-      <div class="${badgeClass}">${p.isTotal ? 'گزارش مدیریتی' : 'گزارش فروش'}</div>
-    </div>
-    <div class="sum-grid">
-      <div class="sc"><div class="sn">${sold}</div><div class="sl">فروش کل</div></div>
-      <div class="sc"><div class="sn">${maxT}</div><div class="sl">هدف کل</div></div>
-      <div class="sc"><div class="sn">${maxT - sold}</div><div class="sl">باقیمانده</div></div>
-      <div class="sc"><div class="sn">${pct}%</div><div class="sl">پیشرفت</div></div>
-    </div>
-    <div class="dv"></div>
-    <div class="rows">${rows}</div>
-  </div>`;
+/* ---------- KPI cards ---------- */
+function renderKPIs(people) {
+  const team = people.find(p => p.isTotal);
+  const sold = team.items.reduce((a,b)=>a+b.v,0);
+  const maxT = team.items.reduce((a,b)=>a+b.m,0);
+  const pct = maxT ? Math.round(sold/maxT*100) : 0;
+  const cards = [
+    { label: 'فروش امروز تیم', value: formatNum(team.daily), unit: 'تومان' },
+    { label: 'قسط امروز تیم', value: formatNum(team.installmentToday), unit: 'تومان' },
+    { label: 'پیشرفت کلی هدف', value: pct + '%', unit: '' },
+    { label: 'تعداد کارشناسان فعال', value: people.length - 1, unit: 'نفر' }
+  ];
+  document.getElementById('kpiRow').innerHTML = cards.map(c => `
+    <div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}${c.unit ? `<span class="unit">${c.unit}</span>` : ''}</div>
+    </div>`).join('');
 }
 
-function renderSlides() {
-  const wrap = document.getElementById('slidesWrap');
-  const dots = document.getElementById('navDots');
-  wrap.innerHTML = people.map((p, i) => buildSlide(p, i)).join('');
-  dots.innerHTML = people.map((_, i) => `<div class="dot${i === 0 ? ' active' : ''}" data-i="${i}"></div>`).join('');
-  document.querySelectorAll('.dot').forEach(d => {
-    d.onclick = () => { stopPlay(); goTo(+d.dataset.i); if (playing) startPlay(); };
+/* ---------- chart ---------- */
+function renderChart(people) {
+  const persons = people.filter(p => !p.isTotal);
+  const labels = persons.map(p => p.name);
+  const salesData = persons.map(p => p.daily);
+  const installmentData = persons.map(p => p.installmentToday);
+
+  if (salesChartInstance) salesChartInstance.destroy();
+  const ctx = document.getElementById('salesChart');
+  salesChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 36 },
+        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 36 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#bbb', font: { family: 'Vazirmatn', size: 12 } }, grid: { display: false } },
+        y: { ticks: { color: '#777', font: { size: 11 }, callback: (v) => formatNum(v) }, grid: { color: '#1d1d1d' } }
+      }
+    }
   });
 }
 
+/* ---------- leaderboard ---------- */
+function renderLeaderboard(people) {
+  const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
+  const html = persons.map((p, i) => `
+    <div class="lb-row">
+      <div class="lb-rank ${i===0?'gold':''}">${i+1}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-val">${formatNum(p.daily)} تومان</div>
+    </div>`).join('');
+  document.getElementById('leaderboard').innerHTML = html;
+}
+
+/* ---------- product slides ---------- */
+function buildSlide(p, idx) {
+  const sold = p.items.reduce((a,b) => a+b.v, 0);
+  const maxT = p.items.reduce((a,b) => a+b.m, 0);
+  const pct = maxT ? Math.round(sold/maxT*100) : 0;
+  const rows = p.items.map(item => {
+    const ip = item.m ? Math.min(Math.round(item.v/item.m*100),100) : 0;
+    return `<div class="ri"><div class="rl">${item.t}</div><div class="bo"><div class="bi" style="width:${ip}%;"></div><div class="bm">${item.v} / ${item.m}</div></div></div>`;
+  }).join('');
+  return `<div class="slide${idx===0?' active':''}" id="slide${idx}">
+    <div class="slide-header">
+      <div><div class="slide-name">${p.name}</div><div class="slide-sub">${p.badge}</div></div>
+      <div class="badge ${p.isTotal?'badge-total':'badge-gold'}">${p.isTotal?'گزارش مدیریتی':'گزارش فروش'}</div>
+    </div>
+    <div class="progress-overall">
+      <span class="label">پیشرفت کلی هدف</span>
+      <div class="track"><div class="fillp" style="width:${pct}%;"></div></div>
+      <span class="pct">${pct}%</span>
+    </div>
+    <div class="rows">${rows}</div>
+  </div>`;
+}
+function renderSlides() {
+  document.getElementById('slidesWrap').innerHTML = people.map((p,i) => buildSlide(p,i)).join('');
+  document.getElementById('navDots').innerHTML = people.map((_,i) => `<div class="dot${i===0?' active':''}" data-i="${i}"></div>`).join('');
+  document.querySelectorAll('.dot').forEach(d => { d.onclick = () => { stopPlay(); goTo(+d.dataset.i); if(playing) startPlay(); }; });
+}
 function goTo(n) {
-  const slides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.dot');
-  if (slides[cur]) slides[cur].classList.remove('active');
-  if (dots[cur]) dots[cur].classList.remove('active');
+  document.querySelectorAll('.slide')[cur]?.classList.remove('active');
+  document.querySelectorAll('.dot')[cur]?.classList.remove('active');
   cur = (n + people.length) % people.length;
-  if (slides[cur]) slides[cur].classList.add('active');
-  if (dots[cur]) dots[cur].classList.add('active');
+  document.querySelectorAll('.slide')[cur]?.classList.add('active');
+  document.querySelectorAll('.dot')[cur]?.classList.add('active');
   resetFill();
 }
-function next() { goTo(cur + 1); }
-function prev() { goTo(cur - 1); }
+function next() { goTo(cur+1); }
 function resetFill() {
-  fill.style.transition = 'none';
-  fill.style.width = '0%';
-  setTimeout(() => { fill.style.transition = `width ${INTERVAL}ms linear`; fill.style.width = '100%'; }, 30);
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  setTimeout(() => { fill.style.transition = `width ${SLIDE_INTERVAL}ms linear`; fill.style.width = '100%'; }, 30);
 }
-function startPlay() { clearInterval(timer); timer = setInterval(next, INTERVAL); resetFill(); }
+function startPlay() { clearInterval(timer); timer = setInterval(next, SLIDE_INTERVAL); resetFill(); }
 function stopPlay() { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0%'; }
 
-document.getElementById('btnNext').onclick = () => { stopPlay(); next(); if (playing) startPlay(); };
-document.getElementById('btnPrev').onclick = () => { stopPlay(); prev(); if (playing) startPlay(); };
-document.getElementById('btnPlay').onclick = function() {
-  playing = !playing;
-  if (playing) { startPlay(); this.textContent = '⏸ توقف'; }
-  else { stopPlay(); this.textContent = '▶ پخش'; }
-};
+/* ---------- clock ---------- */
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const date = now.toLocaleDateString('fa-IR');
+  document.getElementById('clockText').textContent = date + ' — ' + time;
+}
+setInterval(updateClock, 1000);
+updateClock();
 
+/* ---------- main load ---------- */
 async function loadData() {
   try {
     const res = await fetch(CSV_URL);
     if (!res.ok) throw new Error('خطا در دریافت');
     const text = await res.text();
     const rows = parseCSV(text);
-    people = groupByPerson(rows);
-    cur = 0;
+    const { sales, installment } = getDailyMap(rows);
+    const prevCur = cur;
+    people = groupByPerson(rows, sales, installment);
+    cur = Math.min(prevCur, people.length - 1);
+    renderKPIs(people);
+    renderChart(people);
+    renderLeaderboard(people);
     renderSlides();
+    document.querySelectorAll('.slide')[cur]?.classList.add('active');
+    document.querySelectorAll('.dot')[cur]?.classList.add('active');
     if (playing) startPlay();
-    const now = new Date().toLocaleTimeString('fa-IR');
-    document.getElementById('refreshInfo').textContent = 'آخرین بروزرسانی: ' + now;
   } catch (e) {
-    document.getElementById('slidesWrap').innerHTML = `<div class="error">خطا در دریافت اطلاعات از Google Sheets<br><small>${e.message}</small></div>`;
+    document.getElementById('slidesWrap').innerHTML = `<div class="err">خطا در دریافت اطلاعات از Google Sheets<br><small>${e.message}</small></div>`;
   }
 }
 
