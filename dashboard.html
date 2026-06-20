@@ -3,77 +3,303 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>گزارش فعالیت تیم</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<title>گزارش تیم فروش</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script type="text/javascript" src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+<script type="text/javascript" src="https://cdn.amcharts.com/lib/3/serial.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
+  html, body {
     font-family: 'Vazirmatn', sans-serif;
+    background: #050608;
+    color: #fff;
     direction: rtl;
-    background: #f4f4f4;
-    padding: 2rem 1.5rem;
+    overflow-x: hidden;
   }
-  h2 { text-align: center; margin-bottom: 6px; font-size: 26px; font-weight: 700; color: #222; }
-  .subtitle { text-align: center; margin-bottom: 30px; font-size: 14px; color: #777; }
-  #chart-wrapper { max-width: 1500px; margin: auto; }
-  .row { display: flex; align-items: center; margin: 20px 0; }
-  .total { width: 80px; text-align: center; font-size: 22px; font-weight: 700; color: #222; flex-shrink: 0; }
-  .right { display: flex; align-items: center; flex: 1; }
-  .name { width: 190px; font-size: 18px; font-weight: 500; text-align: right; margin-left: 15px; flex-shrink: 0; }
-  .bar { flex: 1; height: 46px; background: #e8e8e8; border-radius: 8px; overflow: hidden; }
-  .inner-bar { height: 100%; display: flex; }
-  .seg { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; transition: width .6s ease; }
-  .green { background: #4caf50; }
-  .pink { background: #f06292; }
-  .purple { background: #9c27b0; }
-  .pink-magenta { background: #ec407a; }
-  .phosphor-green { background: #00c853; }
-  .teal { background: #009688; }
-  .blue-light { background: #42a5f5; }
-  .black-matte { background: #333; }
-  .legend { margin: 36px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; font-size: 14px; color: #333; max-width: 1500px; }
-  .legend span { display: flex; align-items: center; }
-  .legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-left: 6px; }
-  .refresh-info { text-align: center; font-size: 12px; color: #999; margin-top: 24px; }
-  .loading, .err { text-align: center; padding: 3rem; color: #888; font-size: 16px; }
-  .err { color: #c0392b; }
+  body {
+    padding: 1.8rem 2.6rem 2.4rem;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(191,151,87,0.12), transparent 38%),
+      radial-gradient(circle at 95% 18%, rgba(191,151,87,0.06), transparent 35%),
+      radial-gradient(circle at 50% 100%, rgba(191,151,87,0.05), transparent 45%),
+      linear-gradient(180deg, #08090b 0%, #050608 100%);
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .stage { position: relative; z-index: 1; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes countGlow { 0%,100% { text-shadow: 0 0 18px rgba(191,151,87,0.0); } 50% { text-shadow: 0 0 20px rgba(191,151,87,0.4); } }
+  @keyframes crownFloat { 0%,100% { transform: translateY(0) translateX(-50%); } 50% { transform: translateY(-3px) translateX(-50%); } }
+  @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+  @keyframes ringRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ===== TOP BAR ===== */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.6rem; flex-wrap: wrap; gap: 12px; animation: fadeUp .5s ease; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand-mark { height: 50px; display: flex; align-items: center; flex-shrink: 0; }
+  .brand-mark img { height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(191,151,87,0.3)); }
+  .brand-text h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(90deg, #fff 0%, #f0deb8 50%, #fff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 6s linear infinite; }
+  .brand-text p { font-size: 13px; color: #888; margin-top: 3px; }
+  .top-right { display: flex; align-items: center; gap: 14px; }
+  .clock-box { text-align: left; }
+  .clock-time { font-size: 20px; font-weight: 700; color: #f0deb8; font-variant-numeric: tabular-nums; }
+  .clock-date { font-size: 12px; color: #777; margin-top: 1px; }
+  .live-pill { display: flex; align-items: center; gap: 8px; background: #121317; border: 1px solid #262626; border-radius: 30px; padding: 8px 18px; font-size: 13px; color: #aaa; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 10px #3ecf6e; animation: pulse 1.6s ease-in-out infinite; }
+
+  /* ===== SECTION LABEL ===== */
+  .section-label { display: flex; align-items: center; gap: 10px; margin: 1.8rem 0 .9rem; }
+  .section-label .num { width: 24px; height: 24px; border-radius: 7px; background: rgba(191,151,87,0.15); border: 1px solid rgba(191,151,87,0.4); color: #f0deb8; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .section-label .txt { font-size: 15px; font-weight: 700; color: #ccc; }
+  .section-label .line { flex: 1; height: 1px; background: linear-gradient(90deg, #2a2a2a, transparent); }
+
+  /* ===== KPI ROW ===== */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .kpi-card {
+    background: linear-gradient(160deg, #14151a 0%, #0d0e10 100%);
+    border: 1px solid #232323;
+    border-radius: 18px;
+    padding: 1.25rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp .6s ease backwards;
+  }
+  .kpi-card:nth-child(1) { animation-delay: .05s; }
+  .kpi-card:nth-child(2) { animation-delay: .1s; }
+  .kpi-card:nth-child(3) { animation-delay: .15s; }
+  .kpi-card:nth-child(4) { animation-delay: .2s; }
+  .kpi-card::before { content: ''; position: absolute; top: -20%; right: -20%; width: 140px; height: 140px; background: radial-gradient(circle, rgba(191,151,87,0.2), transparent 70%); border-radius: 50%; }
+  .kpi-card::after { content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #BF9757, transparent); opacity: .7; }
+  .kpi-label { font-size: 13px; color: #8a8a8a; margin-bottom: 6px; font-weight: 500; }
+  .kpi-value { font-size: 32px; font-weight: 700; color: #fff; white-space: nowrap; position: relative; z-index: 1; animation: countGlow 3s ease-in-out infinite; }
+  .kpi-value .unit { font-size: 14px; color: #999; font-weight: 500; margin-right: 5px; }
+  .kpi-bar { height: 4px; background: #1d1e22; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, #8a6d3e, #f0deb8); border-radius: 4px; transition: width 1s ease; }
+
+  /* ===== TEAM STRIP ===== */
+  .team-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .team-card {
+    background: linear-gradient(160deg, #131418 0%, #0d0e10 100%);
+    border: 1px solid #222226;
+    border-radius: 18px;
+    padding: 1rem .8rem 1.1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp .6s ease backwards;
+  }
+  .team-card:nth-child(1) { animation-delay: .05s; }
+  .team-card:nth-child(2) { animation-delay: .1s; }
+  .team-card:nth-child(3) { animation-delay: .15s; }
+  .team-card:nth-child(4) { animation-delay: .2s; }
+  .team-card:nth-child(5) { animation-delay: .25s; }
+  .team-card.leader { border-color: #222226; }
+  .crown-icon { display: none; }
+  .avatar-ring { width: 78px; height: 78px; border-radius: 50%; margin: 0 auto 10px; position: relative; padding: 3px; background: #2a2a2a; }
+  .avatar-img-wrap { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #1a1a1c; border: 2px solid #0d0e10; }
+  .avatar-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .team-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .team-role { font-size: 11px; color: #777; margin-bottom: 8px; }
+  .team-daily { font-size: 17px; font-weight: 700; color: #f0deb8; }
+  .team-daily-label { font-size: 10px; color: #666; margin-top: 1px; }
+  .team-rank-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #1c1c1e; color: #888; }
+
+  /* ===== MAIN GRID ===== */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: linear-gradient(160deg, #131418 0%, #0d0e10 100%);
+    border: 1px solid #222226;
+    border-radius: 20px;
+    padding: 1.5rem;
+    animation: fadeUp .6s ease .1s backwards;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; position: relative; z-index: 1; }
+  .panel-title h2 { font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .panel-title h2::before { content: ''; width: 6px; height: 18px; border-radius: 3px; background: #BF9757; display: inline-block; }
+  .panel-title .tag { font-size: 13px; color: #f0deb8; background: rgba(191,151,87,0.15); border: 1px solid rgba(191,151,87,0.45); border-radius: 20px; padding: 5px 15px; font-weight: 700; }
+
+  .chart-wrap { position: relative; height: 360px; }
+  .legend-row { display: flex; justify-content: center; gap: 34px; margin-top: 14px; font-size: 16px; color: #ccc; font-weight: 500; }
+  .legend-item { display: flex; align-items: center; gap: 9px; }
+  .legend-dot { width: 15px; height: 15px; border-radius: 4px; }
+
+  .sub-panel { margin-top: 18px; background: #0c0d0f; border: 1px solid #1d1d1f; border-radius: 16px; padding: 1.2rem; }
+  .sub-panel-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #ddd; }
+
+  .lb-row { display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: .5px solid #1c1c1c; }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { width: 32px; height: 32px; border-radius: 10px; background: #1a1a1c; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #888; flex-shrink: 0; }
+  .lb-rank.r1 { background: linear-gradient(135deg, #f4d27a, #BF9757); color: #2a1f0d; }
+  .lb-rank.r2 { background: #b9b9b9; color: #1a1a1a; }
+  .lb-rank.r3 { background: #a36a3e; color: #1a1a1a; }
+  .lb-name { flex: 1; font-size: 17px; font-weight: 500; }
+  .lb-bar-mini { width: 80px; height: 7px; background: #1d1d1f; border-radius: 4px; overflow: hidden; }
+  .lb-bar-mini-fill { height: 100%; background: #BF9757; border-radius: 4px; }
+  .lb-val { font-size: 16px; font-weight: 700; color: #f0deb8; white-space: nowrap; min-width: 100px; text-align: left; }
+
+  .timer-bar { height: 4px; background: #1d1d1f; border-radius: 3px; margin-bottom: 1.1rem; overflow: hidden; }
+  .timer-fill { height: 100%; background: linear-gradient(90deg, #8a6d3e, #f0deb8); width: 0%; transition: width linear; }
+  .slide { display: none; }
+  .slide.active { display: block; animation: fadeUp .45s ease; }
+  .slide-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 8px; }
+  .slide-person { display: flex; align-items: center; gap: 12px; }
+  .slide-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #1a1a1c; border: 2px solid #BF9757; flex-shrink: 0; }
+  .slide-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .slide-avatar.no-img { display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #BF9757; background: rgba(191,151,87,0.12); }
+  .slide-name { font-size: 24px; font-weight: 700; }
+  .slide-sub { font-size: 14px; color: #777; margin-top: 2px; }
+  .badge { font-size: 13px; padding: 6px 16px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+  .badge-gold { background: linear-gradient(135deg, #f0deb8, #BF9757); color: #2a1f0d; }
+  .badge-total { background: rgba(191,151,87,0.15); border: 1px solid #BF9757; color: #f0deb8; }
+  .progress-overall { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; background: #0c0d0f; border: 1px solid #1d1d1f; border-radius: 12px; padding: 10px 14px; }
+  .progress-overall .label { font-size: 13px; color: #999; white-space: nowrap; }
+  .progress-overall .track { flex: 1; height: 9px; background: #1d1d1f; border-radius: 8px; overflow: hidden; }
+  .progress-overall .fillp { height: 100%; background: linear-gradient(90deg, #8a6d3e, #f0deb8); border-radius: 8px; transition: width .6s ease; }
+  .progress-overall .pct { font-size: 15px; font-weight: 700; color: #f0deb8; min-width: 42px; text-align: left; }
+  .rows { display: flex; flex-direction: column; gap: 9px; }
+  .ri { display: flex; align-items: center; gap: 10px; }
+  .rl { width: 150px; min-width: 110px; font-size: 16px; font-weight: 500; color: #ccc; text-align: right; flex-shrink: 0; }
+  .bo { flex: 1; height: 30px; background: #16171a; border-radius: 24px; position: relative; overflow: hidden; border: .5px solid #262626; }
+  .bi { height: 100%; border-radius: 24px; background: linear-gradient(90deg, #8a6d3e, #BF9757); transition: width .6s ease; }
+  .bm { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #fff; font-weight: 700; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.2rem; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2a2a; cursor: pointer; border: 1px solid #3a3a3a; transition: all .3s; }
+  .dot.active { background: #BF9757; box-shadow: 0 0 8px rgba(191,151,87,0.6); transform: scale(1.3); }
+
+  /* ===== ACTIVITY PANEL ===== */
+  .activity-panel { margin-top: 0; }
+  .activity-row { display: flex; align-items: center; margin: 16px 0; gap: 14px; }
+  .activity-total { width: 58px; text-align: center; font-size: 22px; font-weight: 700; color: #f0deb8; flex-shrink: 0; }
+  .activity-name { width: 180px; min-width: 130px; font-size: 16px; font-weight: 500; text-align: right; flex-shrink: 0; color: #ddd; }
+  .activity-bar { flex: 1; height: 40px; background: #16171a; border-radius: 8px; overflow: hidden; border: .5px solid #232323; }
+  .activity-inner { height: 100%; display: flex; transition: width .6s ease; }
+  .activity-seg { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #0a0a0a; white-space: nowrap; overflow: hidden; }
+  .a-green { background: #4caf50; }
+  .a-pink { background: #f06292; }
+  .a-purple { background: #9c27b0; color: #fff; }
+  .a-pink-magenta { background: #ec407a; }
+  .a-phosphor-green { background: #00c853; }
+  .a-teal { background: #00bfa5; }
+  .a-blue-light { background: #42a5f5; }
+  .a-black-matte { background: #4a4a4a; color: #fff; }
+  .activity-legend { margin-top: 1.3rem; display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: #bbb; justify-content: center; }
+  .activity-legend span { display: flex; align-items: center; gap: 7px; }
+  .activity-legend i { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
+
+  .loading, .err { text-align: center; padding: 3rem; color: #666; font-size: 16px; }
+  .err { color: #e24b4a; }
 </style>
 </head>
 <body>
+<div class="stage">
 
-<h2>گزارش فعالیت تیم</h2>
-<div class="subtitle" id="subtitle">در حال بارگذاری...</div>
-
-<div id="chart-wrapper"><div class="loading">در حال دریافت اطلاعات از Google Sheets...</div></div>
-
-<div class="legend">
-  <span><i class="black-matte"></i>تماس خروجی</span>
-  <span><i class="blue-light"></i>تماس ورودی</span>
-  <span><i class="green"></i>پرزنت عمیق</span>
-  <span><i class="pink"></i>ارسال پیغام</span>
-  <span><i class="purple"></i>پیگیری در آینده</span>
-  <span><i class="pink-magenta"></i>تکمیل مشخصات فردی و کاری</span>
-  <span><i class="phosphor-green"></i>پیگیری ویژه</span>
-  <span><i class="teal"></i>لیدهای ساجست</span>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><img src="https://amozeshamlak.com/wp-content/uploads/2026/05/oe-w-name-01-1-e1777970042185.png" alt="لوگو" /></div>
+    <div class="brand-text">
+      <h1>گزارش تیم فروش</h1>
+      <p>اتاق فرمان عملکرد تیم فروش</p>
+    </div>
+  </div>
+  <div class="top-right">
+    <div class="clock-box">
+      <div class="clock-time" id="clockTime"></div>
+      <div class="clock-date" id="clockDate"></div>
+    </div>
+    <div class="live-pill"><span class="live-dot"></span>زنده — متصل به Google Sheets</div>
+  </div>
 </div>
 
-<div class="refresh-info" id="refreshInfo"></div>
+<div class="section-label"><div class="num">۱</div><div class="txt">فروش، قسط و گزارش تفصیلی</div><div class="line"></div></div>
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">
+      <h2>فروش و قسط روزانه هر کارشناس</h2>
+      <span class="tag">امروز</span>
+    </div>
+    <div class="chart-wrap">
+      <div id="salesChart3d" style="width:100%; height:100%;" role="img" aria-label="نمودار سه‌بعدی فروش و قسط امروز هر کارشناس فروش"></div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><span class="legend-dot" style="background:#FCD202;"></span>فروش</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7d7d7d;"></span>قسط</div>
+    </div>
+  </div>
 
+  <div class="panel">
+    <div class="panel-title">
+      <h2>گزارش تفصیلی محصولات</h2>
+      <span class="tag">به ترتیب</span>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    <div id="slidesWrap"><div class="loading">در حال دریافت اطلاعات...</div></div>
+    <div class="nav" id="navDots"></div>
+  </div>
+</div>
+
+<div class="section-label"><div class="num">۲</div><div class="txt">گزارش فعالیت CRM</div><div class="line"></div></div>
+<div class="panel activity-panel">
+  <div class="panel-title">
+    <h2>فعالیت روزانه تیم در CRM</h2>
+    <span class="tag" id="activitySubtitle">امروز</span>
+  </div>
+  <div id="activityWrapper"><div class="loading">در حال دریافت اطلاعات...</div></div>
+  <div class="activity-legend">
+    <span><i class="a-black-matte"></i>تماس خروجی</span>
+    <span><i class="a-blue-light"></i>تماس ورودی</span>
+    <span><i class="a-green"></i>پرزنت عمیق</span>
+    <span><i class="a-pink"></i>ارسال پیغام</span>
+    <span><i class="a-purple"></i>پیگیری در آینده</span>
+    <span><i class="a-pink-magenta"></i>تکمیل مشخصات فردی و کاری</span>
+    <span><i class="a-phosphor-green"></i>پیگیری ویژه</span>
+    <span><i class="a-teal"></i>لیدهای ساجست</span>
+  </div>
+</div>
+
+</div>
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREbVqCizGPAJxn42P6HMEOWXwC8M7YZulA33gH9MplFbhbHxWn6UIxzxIn765HwvPhLBVJ-L6GO2Gb/pub?output=csv";
+const SLIDE_INTERVAL = 15000;
 const AUTO_REFRESH_MS = 10 * 1000;
 
-const COLUMN_MAP = {
-  "تماس خروجی": "black-matte",
-  "تماس ورودی": "blue-light",
-  "پرزنت عمیق": "green",
-  "ارسال پیغام": "pink",
-  "پیگیری در آینده": "purple",
-  "تکمیل مشخصات فردی و کاری": "pink-magenta",
-  "پیگیری ویژه": "phosphor-green",
-  "لیدهای ساجست": "teal"
+const PHOTOS = {
+  "شهرزاد دستجردی": "https://amozeshamlak.com/wp-content/uploads/2026/04/dastjerd-1-scaled.webp",
+  "نازنین وزیری": "https://amozeshamlak.com/wp-content/uploads/2026/04/vazir.webp",
+  "فاطمه پرسشی": "https://amozeshamlak.com/wp-content/uploads/2026/04/porsesh-scaled.webp",
+  "زهرا آذر": "https://amozeshamlak.com/wp-content/uploads/2026/04/azar-scaled.webp",
+  "زهرا حسین زاده": "https://amozeshamlak.com/wp-content/uploads/2026/05/IMG_20260426_125219-3.png"
 };
-const COLUMN_ORDER = Object.keys(COLUMN_MAP);
+
+const ACTIVITY_COLUMN_MAP = {
+  "تماس خروجی": "a-black-matte",
+  "تماس ورودی": "a-blue-light",
+  "پرزنت عمیق": "a-green",
+  "ارسال پیغام": "a-pink",
+  "پیگیری در آینده": "a-purple",
+  "تکمیل مشخصات فردی و کاری": "a-pink-magenta",
+  "پیگیری ویژه": "a-phosphor-green",
+  "لیدهای ساجست": "a-teal"
+};
+const ACTIVITY_COLUMN_ORDER = Object.keys(ACTIVITY_COLUMN_MAP);
+
+let cur = 0, playing = true, timer = null, people = [];
+
+const fill = document.getElementById('timerFill');
 
 function parseCSV(text) {
   const rows = [];
@@ -98,32 +324,77 @@ function parseCSV(text) {
   if (field.length || row.length) { row.push(field); rows.push(row); }
   return rows.filter(r => r.some(c => c.trim() !== ''));
 }
-
+function rowsToObjects(rawRows) {
+  const headers = rawRows[0].map(h => h.trim());
+  return rawRows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (r[i] || '').trim());
+    return obj;
+  });
+}
 function parseNumber(str) {
   if (!str) return 0;
   const cleaned = String(str).replace(/[,\s]/g, '');
   const n = parseFloat(cleaned);
   return isNaN(n) ? 0 : n;
 }
+function formatNum(n) { return Number(n || 0).toLocaleString('en-US'); }
+function initials(name) { return name.trim().split(' ')[0].charAt(0); }
+
+function getDailyMap(rows) {
+  const sales = {}, installment = {};
+  rows.forEach(row => {
+    const name = row['Foroosh'];
+    if (!name) return;
+    sales[name] = parseNumber(row['valueF']);
+    installment[name] = parseNumber(row['ValueG']);
+  });
+  return { sales, installment };
+}
+
+function groupByPerson(rows, dailySales, dailyInstallment) {
+  const map = {}, order = [];
+  rows.forEach(row => {
+    const name = row['name']; if (!name) return;
+    if (!map[name]) { map[name] = { name, badge: row['badge']||'کارشناس فروش', items: [] }; order.push(name); }
+    map[name].items.push({ t: row['product'], v: parseNumber(row['value']), m: parseNumber(row['max']) || 1 });
+  });
+  const result = order.map(n => map[n]);
+  result.forEach(p => {
+    p.daily = dailySales[p.name] || 0;
+    p.installmentToday = dailyInstallment[p.name] || 0;
+    p.photo = PHOTOS[p.name] || null;
+  });
+  const allP = {};
+  result.forEach(p => p.items.forEach(item => {
+    if (!allP[item.t]) allP[item.t] = { t: item.t, v: 0, m: 0 };
+    allP[item.t].v += item.v; allP[item.t].m += item.m;
+  }));
+  const totalDaily = result.reduce((a, p) => a + (p.daily || 0), 0);
+  const totalInstallment = result.reduce((a, p) => a + (p.installmentToday || 0), 0);
+  result.push({ name: 'آمار کلی تیم', badge: 'مجموع ' + result.length + ' نفر', isTotal: true, items: Object.values(allP), daily: totalDaily, installmentToday: totalInstallment });
+  return result;
+}
 
 function findActivityTable(allRows) {
   for (let i = 0; i < allRows.length; i++) {
     const row = allRows[i].map(c => c.trim());
-    if (row.includes('کاربر') && row.some(c => COLUMN_ORDER.includes(c))) {
+    if (row.includes('کاربر') && row.some(c => ACTIVITY_COLUMN_ORDER.includes(c))) {
       return { headerIndex: i, headers: row };
     }
   }
   return null;
 }
-
-function buildUsers(allRows) {
+function buildActivityUsers(allRows) {
   const table = findActivityTable(allRows);
   if (!table) return [];
   const { headerIndex, headers } = table;
   const userCol = headers.indexOf('کاربر');
 
+  // برای هر دسته فعالیت، همه ستون‌هایی که اسمشان یکسان است را پیدا کن
+  // (مثلاً اگر «تماس ورودی» دوبار در هدر تکرار شده، هر دو ستون با هم جمع شوند)
   const colIndicesByLabel = {};
-  COLUMN_ORDER.forEach(label => {
+  ACTIVITY_COLUMN_ORDER.forEach(label => {
     colIndicesByLabel[label] = [];
     headers.forEach((h, idx) => { if (h === label) colIndicesByLabel[label].push(idx); });
   });
@@ -134,79 +405,193 @@ function buildUsers(allRows) {
     const name = (row[userCol] || '').trim();
     if (!name) break;
     const user = { name, total: 0 };
-    COLUMN_ORDER.forEach(label => {
+    ACTIVITY_COLUMN_ORDER.forEach(label => {
       const val = colIndicesByLabel[label].reduce((sum, colIdx) => sum + parseNumber(row[colIdx]), 0);
-      user[COLUMN_MAP[label]] = val;
+      user[ACTIVITY_COLUMN_MAP[label]] = val;
       user.total += val;
     });
     users.push(user);
   }
   return users.sort((a, b) => b.total - a.total);
 }
-
-function renderChart(users) {
-  const wrapper = document.getElementById('chart-wrapper');
+function renderActivity(users) {
+  const wrapper = document.getElementById('activityWrapper');
   if (!users.length) {
     wrapper.innerHTML = '<div class="err">جدول گزارش فعالیت در شیت پیدا نشد</div>';
     return;
   }
   const maxValue = Math.max(...users.map(u => u.total), 1);
-  wrapper.innerHTML = '';
-  users.forEach(user => {
-    const row = document.createElement('div');
-    row.className = 'row';
-
-    const totalBox = document.createElement('div');
-    totalBox.className = 'total';
-    totalBox.innerText = user.total;
-
-    const right = document.createElement('div');
-    right.className = 'right';
-
-    const name = document.createElement('div');
-    name.className = 'name';
-    name.innerText = user.name;
-
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-
-    const innerBar = document.createElement('div');
-    innerBar.className = 'inner-bar';
-    innerBar.style.width = (user.total / maxValue * 100) + '%';
-
-    Object.values(COLUMN_MAP).forEach(c => {
+  wrapper.innerHTML = users.map(user => {
+    const segs = Object.values(ACTIVITY_COLUMN_MAP).map(c => {
       const v = user[c] || 0;
-      if (v) {
-        const seg = document.createElement('div');
-        seg.className = 'seg ' + c;
-        seg.style.width = (v / user.total * 100) + '%';
-        seg.innerText = v;
-        innerBar.appendChild(seg);
-      }
-    });
+      if (!v) return '';
+      return `<div class="activity-seg ${c}" style="width:${(v/user.total*100)}%;">${v}</div>`;
+    }).join('');
+    return `<div class="activity-row">
+      <div class="activity-total">${user.total}</div>
+      <div class="activity-name">${user.name}</div>
+      <div class="activity-bar"><div class="activity-inner" style="width:${(user.total/maxValue*100)}%;">${segs}</div></div>
+    </div>`;
+  }).join('');
+}
 
-    bar.appendChild(innerBar);
-    right.appendChild(name);
-    right.appendChild(bar);
-    row.appendChild(totalBox);
-    row.appendChild(right);
-    wrapper.appendChild(row);
+function nowLabel() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  const date = now.toLocaleDateString('fa-IR');
+  return "ساعت " + time + " روز " + date;
+}
+
+function renderChart(people) {
+  const persons = people.filter(p => !p.isTotal);
+  const dataProvider = persons.map(p => ({
+    category: p.name,
+    sales: p.daily,
+    installment: p.installmentToday
+  }));
+
+  AmCharts.makeChart("salesChart3d", {
+    "type": "serial",
+    "categoryField": "category",
+    "angle": 30,
+    "depth3D": 20,
+    "startDuration": 1,
+    "fontFamily": "Vazirmatn",
+    "fontSize": 16,
+    "theme": "default",
+    "backgroundColor": "#131418",
+    "backgroundAlpha": 0,
+    "color": "#ddd",
+    "categoryAxis": {
+      "gridPosition": "start",
+      "color": "#ddd",
+      "axisColor": "#333",
+      "gridAlpha": 0
+    },
+    "chartCursor": { "enabled": true },
+    "graphs": [
+      {
+        "balloonText": "[[title]] of [[category]]: [[value]]",
+        "fillAlphas": 1,
+        "id": "AmGraph-1",
+        "title": "فروش",
+        "type": "column",
+        "valueField": "sales",
+        "fillColors": "#FCD202",
+        "labelText": "[[value]]",
+        "labelPosition": "middle",
+        "labelColor": "#000000",
+        "color": "#000000",
+        "showAllValueLabels": true
+      },
+      {
+        "balloonText": "[[title]] of [[category]]: [[value]]",
+        "fillAlphas": 1,
+        "id": "AmGraph-2",
+        "title": "قسط",
+        "type": "column",
+        "valueField": "installment",
+        "fillColors": "#999999",
+        "labelText": "[[value]]",
+        "labelPosition": "middle",
+        "labelColor": "#000000",
+        "color": "#000000",
+        "showAllValueLabels": true
+      }
+    ],
+    "valueAxes": [{ "id": "ValueAxis-1", "labelsEnabled": false, "gridAlpha": 0, "axisAlpha": 0 }],
+    "legend": { "enabled": false },
+    "balloon": { "adjustBorderColor": true },
+    "titles": [{ "id": "Title-1", "size": 15, "color": "#999", "text": nowLabel() }],
+    "dataProvider": dataProvider
   });
 }
+
+function buildSlide(p, idx) {
+  const sold = p.items.reduce((a,b) => a+b.v, 0);
+  const maxT = p.items.reduce((a,b) => a+b.m, 0);
+  const pct = maxT ? Math.round(sold/maxT*100) : 0;
+  const rows = p.items.map(item => {
+    const ip = item.m ? Math.min(Math.round(item.v/item.m*100),100) : 0;
+    return `<div class="ri"><div class="rl">${item.t}</div><div class="bo"><div class="bi" style="width:${ip}%;"></div><div class="bm">${item.v} / ${item.m}</div></div></div>`;
+  }).join('');
+  const avatarHtml = p.isTotal
+    ? `<div class="slide-avatar no-img">👥</div>`
+    : (p.photo ? `<div class="slide-avatar"><img src="${p.photo}" alt="${p.name}" /></div>` : `<div class="slide-avatar no-img">${initials(p.name)}</div>`);
+  return `<div class="slide${idx===0?' active':''}" id="slide${idx}">
+    <div class="slide-header">
+      <div class="slide-person">
+        ${avatarHtml}
+        <div><div class="slide-name">${p.name}</div><div class="slide-sub">${p.badge}</div></div>
+      </div>
+      <div class="badge ${p.isTotal?'badge-total':'badge-gold'}">${p.isTotal?'گزارش مدیریتی':'گزارش فروش'}</div>
+    </div>
+    <div class="progress-overall">
+      <span class="label">پیشرفت کلی هدف</span>
+      <div class="track"><div class="fillp" style="width:${pct}%;"></div></div>
+      <span class="pct">${pct}%</span>
+    </div>
+    <div class="rows">${rows}</div>
+  </div>`;
+}
+function renderSlides() {
+  document.getElementById('slidesWrap').innerHTML = people.map((p,i) => buildSlide(p,i)).join('');
+  document.getElementById('navDots').innerHTML = people.map((_,i) => `<div class="dot${i===0?' active':''}" data-i="${i}"></div>`).join('');
+  document.querySelectorAll('.dot').forEach(d => { d.onclick = () => { stopPlay(); goTo(+d.dataset.i); if(playing) startPlay(); }; });
+}
+function goTo(n) {
+  document.querySelectorAll('.slide')[cur]?.classList.remove('active');
+  document.querySelectorAll('.dot')[cur]?.classList.remove('active');
+  cur = (n + people.length) % people.length;
+  document.querySelectorAll('.slide')[cur]?.classList.add('active');
+  document.querySelectorAll('.dot')[cur]?.classList.add('active');
+  resetFill();
+}
+function next() { goTo(cur+1); }
+function resetFill() {
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  setTimeout(() => { fill.style.transition = `width ${SLIDE_INTERVAL}ms linear`; fill.style.width = '100%'; }, 30);
+}
+function startPlay() { clearInterval(timer); timer = setInterval(next, SLIDE_INTERVAL); resetFill(); }
+function stopPlay() { clearInterval(timer); fill.style.transition = 'none'; fill.style.width = '0%'; }
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('clockDate').textContent = now.toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+let lastCsvText = null;
 
 async function loadData() {
   try {
     const res = await fetch(CSV_URL);
     if (!res.ok) throw new Error('خطا در دریافت');
     const text = await res.text();
+
+    // اگر دیتای شیت نسبت به قبل تغییری نکرده، هیچ چیزی رو دوباره رندر نکن
+    if (text === lastCsvText) return;
+    lastCsvText = text;
+
     const allRows = parseCSV(text);
-    const users = buildUsers(allRows);
-    renderChart(users);
-    const now = new Date();
-    document.getElementById('subtitle').textContent = 'بروزرسانی زنده — ' + now.toLocaleDateString('fa-IR');
-    document.getElementById('refreshInfo').textContent = 'آخرین بروزرسانی: ' + now.toLocaleTimeString('fa-IR');
+    const rows = rowsToObjects(allRows);
+    const { sales, installment } = getDailyMap(rows);
+    const prevCur = cur;
+    people = groupByPerson(rows, sales, installment);
+    cur = Math.min(prevCur, people.length - 1);
+    renderChart(people);
+    renderSlides();
+    document.querySelectorAll('.slide')[cur]?.classList.add('active');
+    document.querySelectorAll('.dot')[cur]?.classList.add('active');
+    if (playing) startPlay();
+
+    const activityUsers = buildActivityUsers(allRows);
+    renderActivity(activityUsers);
+    document.getElementById('activitySubtitle').textContent = new Date().toLocaleDateString('fa-IR');
   } catch (e) {
-    document.getElementById('chart-wrapper').innerHTML = '<div class="err">خطا در دریافت اطلاعات از Google Sheets<br><small>' + e.message + '</small></div>';
+    document.getElementById('slidesWrap').innerHTML = `<div class="err">خطا در دریافت اطلاعات از Google Sheets<br><small>${e.message}</small></div>`;
   }
 }
 
