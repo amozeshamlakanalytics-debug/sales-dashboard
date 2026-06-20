@@ -239,11 +239,6 @@
       <div class="legend-item"><span class="legend-dot" style="background:#FCD202;"></span>فروش</div>
       <div class="legend-item"><span class="legend-dot" style="background:#7d7d7d;"></span>قسط</div>
     </div>
-
-    <div class="sub-panel">
-      <div class="sub-panel-title">رتبه‌بندی فروش امروز</div>
-      <div id="leaderboard"></div>
-    </div>
   </div>
 
   <div class="panel">
@@ -477,7 +472,7 @@ function renderChart(people) {
         "fillColors": "#FCD202",
         "labelText": "[[value]]",
         "labelPosition": "middle",
-        "labelColor": "#1a1a1a",
+        "labelColor": "#000000",
         "showAllValueLabels": true
       },
       {
@@ -490,7 +485,7 @@ function renderChart(people) {
         "fillColors": "#999999",
         "labelText": "[[value]]",
         "labelPosition": "middle",
-        "labelColor": "#fff",
+        "labelColor": "#000000",
         "showAllValueLabels": true
       }
     ],
@@ -500,20 +495,6 @@ function renderChart(people) {
     "titles": [{ "id": "Title-1", "size": 15, "color": "#999", "text": nowLabel() }],
     "dataProvider": dataProvider
   });
-}
-
-function renderLeaderboard(people) {
-  const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
-  const maxVal = Math.max(...persons.map(p => p.daily), 1);
-  const rankClass = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
-  const html = persons.map((p, i) => `
-    <div class="lb-row">
-      <div class="lb-rank ${rankClass(i)}">${i+1}</div>
-      <div class="lb-name">${p.name}</div>
-      <div class="lb-bar-mini"><div class="lb-bar-mini-fill" style="width:${Math.round(p.daily/maxVal*100)}%;"></div></div>
-      <div class="lb-val">${formatNum(p.daily)} تومان</div>
-    </div>`).join('');
-  document.getElementById('leaderboard').innerHTML = html;
 }
 
 function buildSlide(p, idx) {
@@ -591,7 +572,6 @@ async function loadData() {
     people = groupByPerson(rows, sales, installment);
     cur = Math.min(prevCur, people.length - 1);
     renderChart(people);
-    renderLeaderboard(people);
     renderSlides();
     document.querySelectorAll('.slide')[cur]?.classList.add('active');
     document.querySelectorAll('.dot')[cur]?.classList.add('active');
