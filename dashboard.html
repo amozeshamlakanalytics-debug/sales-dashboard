@@ -6,6 +6,7 @@
 <title>گزارش تیم فروش</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -301,6 +302,10 @@ const ACTIVITY_COLUMN_MAP = {
 };
 const ACTIVITY_COLUMN_ORDER = Object.keys(ACTIVITY_COLUMN_MAP);
 
+if (typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
+}
+
 let cur = 0, playing = true, timer = null, people = [];
 let salesChartInstance = null;
 const fill = document.getElementById('timerFill');
@@ -444,8 +449,8 @@ function renderChart(people) {
     data: {
       labels,
       datasets: [
-        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 46 },
-        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 46 }
+        { label: 'فروش', data: salesData, backgroundColor: '#FCD202', borderRadius: 6, maxBarThickness: 46, datalabels: { color: '#1a1a1a' } },
+        { label: 'قسط', data: installmentData, backgroundColor: '#7d7d7d', borderRadius: 6, maxBarThickness: 46, datalabels: { color: '#fff' } }
       ]
     },
     options: {
@@ -453,20 +458,18 @@ function renderChart(people) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' } }
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + formatNum(ctx.parsed.y) + ' تومان' } },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          color: '#fff',
+          font: { family: 'Vazirmatn', size: 14, weight: '700' },
+          formatter: (value) => value ? formatNum(value) : ''
+        }
       },
       scales: {
         x: { ticks: { color: '#ddd', font: { family: 'Vazirmatn', size: 16, weight: '700' } }, grid: { display: false } },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: '#999',
-            font: { size: 13 },
-            callback: (v) => formatNum(v),
-            precision: 0
-          },
-          grid: { color: '#1a1a1c' }
-        }
+        y: { display: false, beginAtZero: true }
       }
     }
   });
