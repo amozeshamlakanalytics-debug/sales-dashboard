@@ -103,12 +103,9 @@
   .team-card:nth-child(3) { animation-delay: .15s; }
   .team-card:nth-child(4) { animation-delay: .2s; }
   .team-card:nth-child(5) { animation-delay: .25s; }
-  .team-card.leader { border-color: rgba(191,151,87,0.6); }
-  .team-card.leader::before { content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%); width: 170px; height: 170px; background: radial-gradient(circle, rgba(191,151,87,0.25), transparent 70%); }
-  .crown-icon { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); font-size: 17px; animation: crownFloat 2s ease-in-out infinite; z-index: 2; }
-  .avatar-ring { width: 78px; height: 78px; border-radius: 50%; margin: 0 auto 10px; position: relative; padding: 3px; background: conic-gradient(from 0deg, #BF9757, #f0deb8, #BF9757); }
-  .team-card.leader .avatar-ring { animation: ringRotate 6s linear infinite; }
-  .team-card:not(.leader) .avatar-ring { background: #2a2a2a; }
+  .team-card.leader { border-color: #222226; }
+  .crown-icon { display: none; }
+  .avatar-ring { width: 78px; height: 78px; border-radius: 50%; margin: 0 auto 10px; position: relative; padding: 3px; background: #2a2a2a; }
   .avatar-img-wrap { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #1a1a1c; border: 2px solid #0d0e10; }
   .avatar-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
   .team-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
@@ -116,9 +113,6 @@
   .team-daily { font-size: 17px; font-weight: 700; color: #f0deb8; }
   .team-daily-label { font-size: 10px; color: #666; margin-top: 1px; }
   .team-rank-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #1c1c1e; color: #888; }
-  .team-rank-badge.gold { background: linear-gradient(135deg, #f4d27a, #BF9757); color: #2a1f0d; }
-  .team-rank-badge.silver { background: #b9b9b9; color: #1a1a1a; }
-  .team-rank-badge.bronze { background: #a36a3e; color: #1a1a1a; }
 
   /* ===== MAIN GRID ===== */
   .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
@@ -465,11 +459,9 @@ function renderKPIs(people) {
 
 function renderTeamStrip(people) {
   const persons = people.filter(p => !p.isTotal).slice().sort((a,b) => b.daily - a.daily);
-  const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
   const html = persons.map((p, i) => `
-    <div class="team-card ${i===0 ? 'leader' : ''}">
-      ${i===0 ? '<div class="crown-icon">👑</div>' : ''}
-      <div class="team-rank-badge ${rankClass(i)}">${i+1}</div>
+    <div class="team-card">
+      <div class="team-rank-badge">${i+1}</div>
       <div class="avatar-ring">
         <div class="avatar-img-wrap">
           ${p.photo ? `<img src="${p.photo}" alt="${p.name}" />` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#BF9757;">${initials(p.name)}</div>`}
@@ -585,11 +577,18 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+let lastCsvText = null;
+
 async function loadData() {
   try {
     const res = await fetch(CSV_URL);
     if (!res.ok) throw new Error('خطا در دریافت');
     const text = await res.text();
+
+    // اگر دیتای شیت نسبت به قبل تغییری نکرده، هیچ چیزی رو دوباره رندر نکن
+    if (text === lastCsvText) return;
+    lastCsvText = text;
+
     const allRows = parseCSV(text);
     const rows = rowsToObjects(allRows);
     const { sales, installment } = getDailyMap(rows);
